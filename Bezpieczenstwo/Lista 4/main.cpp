@@ -186,9 +186,10 @@ int main(){
     }
 
     // Xorowanie potencjalnego klucza ze znakiem spacji
-    for (int j=0; j<max_licznik; j++)
-    temp2[j]=myxor(temp2[j],"00100000");
-
+    for (int j=0; j<max_licznik; j++) {
+        temp2[j] = myxor(temp2[j], "00100000");
+       // cout <<char(strToInt(temp2[j]));
+        }
     // Kryptogram do odszyfrowania
     string X[max_licznik];
     fstream plik;
@@ -211,7 +212,7 @@ int main(){
 
     //Xorowanie klucza i kryptogramu do odszyfrowania
     for (int i=0; i<max_licznik; i++){
-        cout<<char(binToDec(myxor(X[i],temp2[i])));
+       // cout<<char(binToDec(myxor(X[i],temp2[i])));
     }
 
 
