@@ -41,40 +41,13 @@ int binToDec(string binary)
     return decimal;
 }
 
-string myxor(string s1, string s2){
-
-    string str1[8], str2[8], c[8];
-    string complete="";
-    
-    str1[0]=s1.substr(0,1);
-    str2[0]=s2.substr(0,1);
-    str1[1]=s1.substr(1,1);
-    str2[1]=s2.substr(1,1);
-    str1[2]=s1.substr(2,1);
-    str2[2]=s2.substr(2,1);
-    str1[3]=s1.substr(3,1);
-    str2[3]=s2.substr(3,1);
-    str1[4]=s1.substr(4,1);
-    str2[4]=s2.substr(4,1);
-    str1[5]=s1.substr(5,1);
-    str2[5]=s2.substr(5,1);
-    str1[6]=s1.substr(6,1);
-    str2[6]=s2.substr(6,1);
-    str1[7]=s1.substr(7,1);
-    str2[7]=s2.substr(7,1);
-
-
-    for (int i=0; i<8; i++) {
-        if (!str1[i].compare(str2[i]))
-            c[i] = "0";
-        else
-            c[i] = "1";
-        complete+=c[i];
-    }
-
-    return complete;
-
-}
+string myxor(string s1, string s2) {
+    string newx = "";
+    for (int i = 0; i < 8; i++) {
+        if (s1[i] == s2[i] )
+            newx += "0";
+        else newx += "1"; }
+        return newx; }
 
 int najwiekszyLicznik(int n){
     int max_licznik=0;
@@ -210,8 +183,11 @@ int main(){
                 indMax=i;
             }
        temp2[j]=kryptogramy[indMax][j];
-       // temp2[j]=myxor(kryptogramy[indMax][j],"00100000");
     }
+
+    // Xorowanie potencjalnego klucza ze znakiem spacji
+    for (int j=0; j<max_licznik; j++)
+    temp2[j]=myxor(temp2[j],"00100000");
 
     // Kryptogram do odszyfrowania
     string X[max_licznik];
@@ -235,9 +211,8 @@ int main(){
 
     //Xorowanie klucza i kryptogramu do odszyfrowania
     for (int i=0; i<max_licznik; i++){
-       // cout<<binToDec(myxor(X[i],temp2[i]));
+        cout<<char(binToDec(myxor(X[i],temp2[i])));
     }
-
 
 
     return 0;
