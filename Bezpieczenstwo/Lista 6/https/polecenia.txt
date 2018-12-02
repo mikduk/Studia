@@ -1,0 +1,36 @@
+[polecenie] openssl genrsa -out privatekeyBank.pem 4096
+
+Generating RSA private key, 4096 bit long modulus
+..................................................................++
+.....................................................................................................++
+unable to write 'random state'
+e is 65537 (0x10001)
+
+[polecenie] openssl req -new -key privatekeyBank.pem -out certBank.csr
+
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:PL
+State or Province Name (full name) [Some-State]:dolnoslaskie
+Locality Name (eg, city) []:Wroclaw
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:235908
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:localhost/mbank
+Email Address []:235908@student.pwr.edu.pl
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+
+[polecenie] openssl x509 -req -days 45 -in certBank.csr -CA CAcert.crt -CAkey privatekeyB.pem -set_serial 01 -out certBank.crt
+
+Signature ok
+subject=/C=PL/ST=dolnoslaskie/L=Wroclaw/O=235908/CN=localhost/mbank/emailAddress=235908@student.pwr.edu.pl
+Getting CA Private Key
+unable to write 'random state'
