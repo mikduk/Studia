@@ -1,6 +1,6 @@
 <?php
     session_start();
-	
+
 	if(isset($_SESSION['ADMIN'])) {
 		header('Location: admin.php');
 		exit();
@@ -10,11 +10,11 @@
 		header('Location: index.php');
 		exit();
     }
-    
+
     require_once "config.php";
     include_once "cleaner_session.php";
 
-    $polaczenie = @new mysqli($host, $db_user, $db_password, $db_name);	
+    $polaczenie = @new mysqli($host, $db_user, $db_password, $db_name);
 
     if($polaczenie->connect_errno!=0) {
         header('Location: logout.php');
@@ -33,11 +33,11 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="description" content="Logowanie do serwisu transakcyjnego rockyBanku" />
+    <meta name="description" content="Logowanie do serwisu transakcyjnego mBanku" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>rockyBank - zalogowany</title>
+    <title>mBank - zalogowany</title>
     <style>
         table {
             font-family: arial, sans-serif;
@@ -78,7 +78,7 @@ Witamy w banku.
     </tr>
 </table>
 <br />
-<?php 
+<?php
 
     if(isset($_SESSION['error_hist'])) {
         echo '<p style="color: red;">'.$_SESSION['error_hist'].'</p>';
@@ -86,6 +86,6 @@ Witamy w banku.
     }
 
 ?>
-<img src="images/rocky.jpg" alt="" role="presentation" />
+<img src="images/im.jpg" alt="" role="presentation" />
 </body>
 </html>
