@@ -46,18 +46,26 @@ void insertIdentifier(string key, Identifier i);
 void removeIdentifier(string key);
 void createJump(Jump *j, long long int stack, long long int depth);
 void genNum(long long int number, int rX);
+void genNum_condition(long long int number, int rX);
 void add_function(long long int a, long long int b);
 void sub_function(long long int a, long long int b);
 void mul_function(long long int a, long long int b);
 void div_function(long long int a, long long int b);
 void mod_function(long long int a, long long int b);
+void gt_function(long long int a, long long int b);
 void knownMultiplication(long long int a, long long int b);
-long long int russianPeasantBinary(long long int a, long long int b);
+void unknownMultiplication(long long int a, long long int b);
+void knownDivision(long long int a, long long int b);
+void unknownDivision(long long int a, long long int b);
+void knownModulo(long long int a, long long int b);
+void unknownModulo(long long int a, long long int b);
 long long int dzielenie(long long int a, long long int b);
 void rozkazDoKolejki(int nr_rozkazu, int rX, int rY);
 void rozkazDoKolejki_expression(int nr_rozkazu, int rX, int rY); // -2 - rejestr X, -3 - rejestr Y, -1 - brak
+void rozkazDoKolejki_condition(int nr_rozkazu, int rX, int rY); // -2 - rejestr X, -3 - rejestr Y, -1 - brak
 void wykonajRozkazy();
 void wykonajRozkazy_expression();
+void wykonajRozkazy_condition();
 //nagłówki funkcji
 bool assignFlag;
 bool errFlag;
@@ -69,6 +77,7 @@ string expressionArguments[2] = {"-1", "-1"};
 string argumentsTabIndex[2] = {"-1", "-1"};
 string regis_name[8] = {"-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1"};
 long long int regis_value[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
+// TODO zmienić z tablic na listę
 int rozkazy[100][3] = {{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
 			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
 			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
@@ -91,15 +100,29 @@ int rozkazy_expression[100][3] = {{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1,
 			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
 			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
 			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}};
+int rozkazy_condition[100][3] = {{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
+			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
+			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
+			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
+			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
+			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
+			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
+			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
+			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
+			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1},
+			{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}};
 int rozkazy_index=0;
 int rozkazy_index_expression=0;
+int rozkazy_index_condition=0;
 long long int temp_ll;
-string temp_str; 
+string temp_str;
+int temp_flag; // -1 -> nie wiem, 0 -> false, 1 -> true 
 int regisX_index = 0;
 int regisY_index = 0;
 int num_ide = -1; // 0 -> num, 1 -> identifier
 int dzialanie_przemienne = -1; // 0 -> / - ; 1 -> * +
-int krok=0;
+int krok = 0;
+int jump = 0;
 
 %}
 
@@ -195,8 +218,8 @@ command:
         	}
         
 		else if(assignTarget.local == 0){
-				cout << "sprawdzam num_ide" <<endl;
-				if (num_ide == 0 || num_ide == 10){ // brakuje jeszcze 80, 81, 11
+				cout << "sprawdzam num_ide" << endl;
+				if (num_ide == 0 || num_ide == 10){
 					if (num_ide == 10){
 
 						cout << "Wartość do rejestru (identifier : num)" << endl;
@@ -353,7 +376,17 @@ command:
 		assignFlag = true;
 	}
 
-|	IF { assignFlag = false; depth++; } condition { assignFlag = true; } THEN commands if_body  
+|	IF { assignFlag = false; depth++; } condition { assignFlag = true; } THEN {
+		cout << "Jestem w IF condition THEN { " << endl; //test
+		cout << "wykonuje: wykonajRozkazy_condition();" << endl; 			
+		wykonajRozkazy_condition();
+		rozkazDoKolejki_condition(11, temp_reg, -4); //pushCommand("JZERO", temp_reg, krok + x);
+		cout << "wykonuje: wykonajRozkazy();" << endl;
+		wykonajRozkazy();
+		
+		
+			
+	} commands if_body  
 
 |	WHILE { 
 		assignFlag = false; 
@@ -432,10 +465,10 @@ command:
         	}
         
 		else if(assignTarget.local == 0) {
-			cout << "Wartość do rejestru" << endl;
+			cout << "Jestem niestety w READ - wartość do rejestru" << endl;
 			addToReg($2, "-1", -100); //TODO wartość wczytana
 			cout << "Przeszła pętla" << endl;
-            		pushCommand("GET", regisX_index, -1);
+            		rozkazDoKolejki_condition(0, regisX_index, -1); //pushCommand("GET", regisX_index, -1); 
             		pokazRejestr();
 			regisX_index=0;
         	}
@@ -457,34 +490,20 @@ command:
 if_body:
 	ELSE {
         
-		Jump j;
-	        createJump(&j, codeStack.size(), depth);
-	        jumpStack.push_back(j);
-	        pushCommand("JUMP", 101, -1);
-        
-		long long int jumpCount = jumpStack.size()-2;
-	        Jump jump = jumpStack.at(jumpCount);
-	        //addInt(jump.placeInStack, codeStack.size());
-		codeStack.at(jump.placeInStack) = codeStack.at(jump.placeInStack) + " " + to_string(codeStack.size());
-	        jumpCount--;
-        
-		if(jumpCount >= 0 && jumpStack.at(jumpCount).depth == depth) {
-	        	//addInt(jumpStack.at(jumpCount).placeInStack, codeStack.size());
-			codeStack.at(jumpStack.at(jumpCount).placeInStack) = codeStack.at(jumpStack.at(jumpCount).placeInStack) + " " + to_string(codeStack.size());	
-	        }
-        
+		cout << "Jestem w ELSE, WOW!" << endl;
+        	wykonajRozkazy_condition();
+		wykonajRozkazy();
+		cout << "Wykonałem rozkazy w ELSE" << endl;
+		rozkazDoKolejki_condition(12, temp_reg, -4); //JODD X 
+		rozkazDoKolejki_condition(9, temp_reg, -1); // DEC X
+		rozkazDoKolejki_condition(12, temp_reg, -4); // JODD X
 	        assignFlag = true;
 
 	} commands ENDIF {
 
-	        //addInt(jumpStack.at(jumpStack.size()-1).placeInStack, codeStack.size());
-		codeStack.at(jumpStack.at(jumpStack.size()-1).placeInStack) = codeStack.at(jumpStack.at(jumpStack.size()-1).placeInStack) + " " + to_string(codeStack.size());
-	        jumpStack.pop_back();
-	        jumpStack.pop_back();
-
-	        if(jumpStack.size() >= 1 && jumpStack.at(jumpStack.size()-1).depth == depth) {
-	        	jumpStack.pop_back();
-        	}
+	        cout << "commands ENDIF - dzięki Bogu <3" << endl;
+		wykonajRozkazy_condition();
+		wykonajRozkazy();
 
 	        depth--;
         	assignFlag = true;
@@ -492,19 +511,10 @@ if_body:
 
 |	ENDIF {
         
-		long long int jumpCount = jumpStack.size()-1;
-	        //addInt(jumpStack.at(jumpCount).placeInStack, codeStack.size());
-		codeStack.at(jumpStack.at(jumpCount).placeInStack) = codeStack.at(jumpStack.at(jumpCount).placeInStack) + " " + to_string(codeStack.size());
-	        jumpCount--;
+		cout << "ENDIF - całe szczęście :)" << endl;
+		wykonajRozkazy_condition();
+		wykonajRozkazy();		
 
-	        if(jumpCount >= 0 && jumpStack.at(jumpCount).depth == depth) {
-	        	//addInt(jumpStack.at(jumpCount).placeInStack, codeStack.size());
-			codeStack.at(jumpStack.at(jumpCount).placeInStack) = codeStack.at(jumpStack.at(jumpCount).placeInStack) + " " + to_string(codeStack.size());
-	        	jumpStack.pop_back();
-	        }
-
-	        jumpStack.pop_back();
-	        /*registerValue = -1;*/
 	        depth--;
 	        assignFlag = true;
 	}
@@ -532,9 +542,9 @@ for_body:
 			}
             
 			else{
-		                pushCommand("ADD mejbi", -1, -1);
-		                pushCommand("STORE mejbi", -1, -1);
-		                pushCommand("LOADI mejbi", -1, -1);
+		               pushCommand("ADD mejbi", -1, -1);
+		               pushCommand("STORE mejbi", -1, -1);
+		               pushCommand("LOADI mejbi", -1, -1);
             		}
 		}
 
@@ -1006,34 +1016,62 @@ expression:
 
 condition:
 	value EQUAL value {
-	
-			Identifier a = identifierStack.at(expressionArguments[0]);
-        		Identifier b = identifierStack.at(expressionArguments[1]);
 
-        		if(a.type == "NUMBER" && b.type == "NUMBER") {
-            
-				if(stoll(a.name) == stoll(b.name))
- 	               			cout << "PRAWDA" << endl;
-            			else
-                			cout << "FAŁSZ" << endl;
-            
-				removeIdentifier(a.name);
-            			removeIdentifier(b.name);
-        		}
+		dzialanie_przemienne = 1;
+
+		//	num + num	ide + ide	num + ide	ide + num	
+		if(num_ide == 80 || num_ide == 11 || num_ide == 81 || num_ide == 10){
+            			
+			long long int a;
+			long long int b; 
+
+			if (num_ide == 80){
+				a = atoll($1);
+				b = atoll($3);
+			}
+
+			else if (num_ide == 11){				
+				int a_ind = findIndex($1);
+				int b_ind = findIndex($3);
+				cout << "vAv n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
+				a = regis_value[a_ind];
+				b = regis_value[b_ind];
+				cout << "vAv n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+			}
+
+			else if (num_ide == 81){
+				a = atoll($1);
+				int b_ind = findIndex($3);
+				b = regis_value[b_ind];
+			}
+
+			else if (num_ide == 10){
+				int a_ind = findIndex($1);
+				a = regis_value[a_ind];
+				b = atoll($3);
+			}  
+
+
+			add_function(a, b);
+		}
         
-			else {
-	            		cout << "Porównywanie innych typów na razie za trudne" << endl;
-        		}
+		else {
+	            		/*Identifier aI, bI;
+	
+	            		if(identifierStack.count(argumentsTabIndex[0]) > 0)
+	                		aI = identifierStack.at(argumentsTabIndex[0]);
 
-        		Jump j;
-        		createJump(&j, codeStack.size(), depth);
-        		jumpStack.push_back(j);
-        		pushCommand("JZERO", 100, -1);
+	            		if(identifierStack.count(argumentsTabIndex[1]) > 0)
+	                		bI = identifierStack.at(argumentsTabIndex[1]);
 
-        		expressionArguments[0] = "-1";
-        		expressionArguments[1] = "-1";
-			argumentsTabIndex[0] = "-1";
-        		argumentsTabIndex[1] = "-1";
+	            		addTab(a, b, aI, bI);
+
+	            		argumentsTabIndex[0] = "-1";
+	            		argumentsTabIndex[1] = "-1"; */
+		}
+
+		expressionArguments[0] = "-1";
+		expressionArguments[1] = "-1";
 	}
 |	value NOT_EQUAL value {
 	
@@ -1065,35 +1103,67 @@ condition:
 			argumentsTabIndex[0] = "-1";
         		argumentsTabIndex[1] = "-1";
 	}
-|	value LT value {
-	
-			Identifier a = identifierStack.at(expressionArguments[0]);
-        		Identifier b = identifierStack.at(expressionArguments[1]);
+|	value GT value { //dupa
 
-        		if(a.type == "NUMBER" && b.type == "NUMBER") {
-            
-				if(stoll(a.name) < stoll(b.name))
- 	               			cout << "PRAWDA" << endl;
-            			else
-                			cout << "FAŁSZ" << endl;
-            
-				removeIdentifier(a.name);
-            			removeIdentifier(b.name);
-        		}
+		cout << "Jestem w value GT value" << endl;
+
+		dzialanie_przemienne = 0;
+
+		//	num > num	ide > ide	num > ide	ide > num	
+		if(num_ide == 80 || num_ide == 11 || num_ide == 81 || num_ide == 10){
+            			
+			long long int a;
+			long long int b; 
+
+			if (num_ide == 80){
+				a = atoll($1);
+				b = atoll($3);
+			}
+
+			else if (num_ide == 11){				
+				int a_ind = findIndex($1);
+				int b_ind = findIndex($3);
+				cout << "v>v n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
+				a = regis_value[a_ind];
+				b = regis_value[b_ind];
+				cout << "v>v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+			}
+
+			else if (num_ide == 81){
+				a = atoll($1);
+				int b_ind = findIndex($3);
+				b = regis_value[b_ind];
+			}
+
+			else if (num_ide == 10){
+				int a_ind = findIndex($1);
+				a = regis_value[a_ind];
+				b = atoll($3);
+			}  
+
+
+			gt_function(a, b);
+		}
         
-			else {
-	            		cout << "Porównywanie innych typów na razie za trudne" << endl;
-        		}
+		else {
+	            		/*Identifier aI, bI;
+	
+	            		if(identifierStack.count(argumentsTabIndex[0]) > 0)
+	                		aI = identifierStack.at(argumentsTabIndex[0]);
 
-        		Jump j;
-        		createJump(&j, codeStack.size(), depth);
-        		jumpStack.push_back(j);
-        		pushCommand("JZERO", 100, -1);
+	            		if(identifierStack.count(argumentsTabIndex[1]) > 0)
+	                		bI = identifierStack.at(argumentsTabIndex[1]);
 
-        		expressionArguments[0] = "-1";
-        		expressionArguments[1] = "-1";
+	            		addTab(a, b, aI, bI);
+
+	            		argumentsTabIndex[0] = "-1";
+	            		argumentsTabIndex[1] = "-1"; */
+		}
+
+		expressionArguments[0] = "-1";
+		expressionArguments[1] = "-1";
 	}
-|	value GT value {
+|	value LT value {
 	
 			Identifier a = identifierStack.at(expressionArguments[0]);
         		Identifier b = identifierStack.at(expressionArguments[1]);
@@ -1188,7 +1258,7 @@ value:
 
 		else if (num_ide == 0){
 			num_ide = 80;
-			cout << "num : ide (num_ide=80)" <<endl; //test		
+			cout << "num : num (num_ide=80)" <<endl; //test		
 		}	
 		
 		else{
@@ -1339,16 +1409,20 @@ void pushCommand(string str, int r1, int r2){
 			cout << krok++ << ": " << str << endl;
 			//codeStack.push_back(str);
 		}
-		else if (r1 >= 100){
-			cout << krok++ <<": " << str << " " << r1 - 100 << endl;
-			//codeStack.push_back(str);
-		}
+		
 		else{
 			char r = 'A'+r1;
 			cout << krok++ << ": " << str << " " << r << endl;
 			//codeStack.push_back(str);
 		}
 	}
+	else if (r2 > 100){
+		char r = 'A'+r1;
+			cout << krok++ << ": " << str << " " << r << " " << krok + r2 - 100 << endl;
+			cout << "krok = " << krok << endl;
+			cout << "r2 = " << r2 << endl;
+			//codeStack.push_back(str);
+	}	
 	else{
 		char a = 'A'+r1;
 		char b = 'A'+r2;
@@ -1439,6 +1513,37 @@ void genNum(long long int number, int rX){
 		}
 		else if (kolejka[size]==22){
 			rozkazDoKolejki_expression(8, rX, -1);
+		}	
+	}
+}
+
+void genNum_condition(long long int number, int rX){
+	int kolejka[number];
+	long long int index=0, size=number;
+	while (number != 0){
+		if (number > 11 && number%2 == 0){
+		
+			number = number/2;
+			kolejka[index] = 11;
+			index++;			
+		}
+		
+		else{
+			number--;
+			kolejka[index] = 22;
+			index++;		
+		}
+			
+	}
+	if (regis_value[rX] != 0)
+		rozkazDoKolejki_condition(6, rX, rX);
+
+	for (--size; size>=0; size--){
+		if (kolejka[size]==11){
+			rozkazDoKolejki_condition(5, rX, rX);
+		}
+		else if (kolejka[size]==22){
+			rozkazDoKolejki_condition(8, rX, -1);
 		}	
 	}
 }
@@ -1627,43 +1732,14 @@ void sub_function(long long int a, long long int b) {
 				addToReg(to_string(b), "-1", b);
 				genNum(b, regisX_index);
 				rozkazDoKolejki_expression(6, -2, regisX_index);
-				rozkazDoKolejki_expression(6, regisX_index, regisX_index);
-				//removeFromReg_index(regisX_index, "-1", -1);	
-				temp_reg = regisX_index;			
-									
-			}
-		}
-		
-		else if (a < b){
-			if (a < 8){
-				genNum(a, -2); 
-				for(int i=0; i < a; i++) {
-                			rozkazDoKolejki_expression(9, -2, -1);
-				}
-            		}
-
-			else{
-				genNum(a, -2);
-				addToReg(to_string(b), "-1", b);
-				genNum(b, regisX_index);
-				rozkazDoKolejki_expression(6, -2, regisX_index);
 				rozkazDoKolejki_expression(6, regisX_index, regisX_index);	
 				temp_reg = regisX_index;			
 									
 			}
 		}
-	
+		
 		else{
-			if ( a < 8 ){
-				for(int i=0; i < a; i++) {
-                			rozkazDoKolejki_expression(9, -2, -1);		
-				}			
-			}
-
-			else{
-				genNum(a, -2);
-				rozkazDoKolejki_expression(6, -2, -2);
-			}
+                		rozkazDoKolejki_expression(6, -2, -2);
 		}
 		
     	}
@@ -1680,18 +1756,22 @@ void sub_function(long long int a, long long int b) {
 			temp_ll = a - b;
 		cout << "sub_function PO (2) -> temp_ll = " << temp_ll << endl;	
 
-	        genNum(a, -2);
-		if (b < 8 && b >= 0){ 
-			for(int i=0; i < b; i++) {
-                		rozkazDoKolejki_expression(9, -2, -1);
+		if (a <= b && b >= 0){
+			rozkazDoKolejki_expression(6, -2, -2);
+		}
+		else{	        
+			genNum(a, -2);
+			if (b < 8 && b >= 0){ 
+				for(int i=0; i < b; i++) {
+	                		rozkazDoKolejki_expression(9, -2, -1);
 				}
             		}
-		else{
-			regisY_index = findIndex_value(b);
-			rozkazDoKolejki_expression(6, -2, regisY_index);	
-		}
-	        
-    	}
+			else{
+				regisY_index = findIndex_value(b);
+				rozkazDoKolejki_expression(6, -2, regisY_index);	
+			}
+	        }
+	}    	
     
 	// ide - num
 	else if ( num_ide == 10 ) {
@@ -1705,21 +1785,25 @@ void sub_function(long long int a, long long int b) {
 			temp_ll = a - b;
 		cout << "sub_function PO (3) -> temp_ll = " << temp_ll << endl;	
 
-		regisY_index = findIndex_value(a);		
-		rozkazDoKolejki_expression(4, -2, regisY_index);		
+		if (a <= b && a >= 0){
+			rozkazDoKolejki_expression(6, -2, -2);
+		}
+		else{
+			regisY_index = findIndex_value(a);		
+			rozkazDoKolejki_expression(4, -2, regisY_index);		
 
-		if (b < 8){ 
-			for(int i=0; i < b; i++) {
-                		rozkazDoKolejki_expression(9, -2, -1);
+			if (b < 8){ 
+				for(int i=0; i < b; i++) {
+                			rozkazDoKolejki_expression(9, -2, -1);
 				}
             		}
-		else{
-			addToReg(to_string(b), "-1", b);
-			genNum(b, regisX_index);			
-			rozkazDoKolejki_expression(6, -2, regisX_index);
-			temp_reg = regisX_index;	
-		}
-	        
+			else{
+				addToReg(to_string(b), "-1", b);
+				genNum(b, regisX_index);			
+				rozkazDoKolejki_expression(6, -2, regisX_index);
+				temp_reg = regisX_index;	
+			}
+	        }
     	}
     
 
@@ -1735,7 +1819,7 @@ void sub_function(long long int a, long long int b) {
 			temp_ll = a - b;
 		cout << "sub_function PO (4) -> temp_ll = " << temp_ll << endl;
 
-		if (a == b && a < 0) {
+		if (a <= b && a >= 0) {
 			regisY_index = findIndex_value(a);
 			rozkazDoKolejki_expression(6, regisY_index, regisY_index);
         	}
@@ -1813,7 +1897,7 @@ void mul_function(long long int a, long long int b) { //TODO zrobić dla wartoś
 			genNum(a, regisX_index);
 			int tr;
 			temp_reg = regisX_index;			
-			cout << "Rejestr małego a: " << tr << endl; //test
+			cout << "Rejestr małego a: " << temp_reg << endl; //test
 			addToReg(to_string(b), "-1", b);
 			genNum(b, regisX_index);
 			cout << "Rejestr małego b: " << regisX_index << endl; //test
@@ -1891,7 +1975,7 @@ void mul_function(long long int a, long long int b) { //TODO zrobić dla wartoś
 			if (b >= 0)  
 				knownMultiplication(a, b);
 			else
-				russianPeasantBinary(a, b);
+				unknownMultiplication(a, b);
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A, B wyzeruje się sam
 			rozkazDoKolejki_expression(-2, tr, 0); // usunwam rejestr B w C++
 			
@@ -1960,10 +2044,10 @@ void mul_function(long long int a, long long int b) { //TODO zrobić dla wartoś
 			addToReg(to_string(a), "-1", a);
 			tr = regisX_index;
 			rozkazDoKolejki_expression(4, regisX_index, regisY_index);
-			if (b >= 0)  
+			if (a >= 0)  
 				knownMultiplication(a, b);
 			else
-				russianPeasantBinary(a, b);
+				unknownMultiplication(a, b);
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A, B wyzeruje się sam
 			rozkazDoKolejki_expression(-2, tr, 0);		
 		}
@@ -2036,7 +2120,7 @@ void mul_function(long long int a, long long int b) { //TODO zrobić dla wartoś
 			if (a >= 0 && b >= 0)  
 				knownMultiplication(a, b);
 			else
-				russianPeasantBinary(a, b);
+				unknownMultiplication(a, b);
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg);
 			rozkazDoKolejki_expression(-2, tr, 0);	
 		}
@@ -2050,14 +2134,17 @@ void div_function(long long int a, long long int b) { //TODO
 	// num / num
 	if ( num_ide == 80 ) { 
         	
-		cout << "div_function PRZED (1) -> temp_ll = " << temp_ll << endl;
+		cout << "div_function PRZED (1) -> temp_ll = " << temp_ll << endl; //test 
 		if (b == 0)
 		temp_ll = 0;
 		else		
 		temp_ll = a / b;
-		cout << "div_function PO (1) -> temp_ll = " << temp_ll << endl;		
+		cout << "div_function PO (1) -> temp_ll = " << temp_ll << endl;	//test	
 		
-		if (b == 2){
+		if (a < b && a >= 0){
+			rozkazDoKolejki_expression(6, -2, -2);
+		}		
+		else if (b == 2){
 			genNum(a, -2);
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
@@ -2101,12 +2188,20 @@ void div_function(long long int a, long long int b) { //TODO
 		}	
 			
 		else{
-			addToReg(to_string(a), "-1", a);
+			addToReg("div("+to_string(a)+")", "-1", a);
 			genNum(a, regisX_index);
-			temp_reg = regisX_index;
-			addToReg(to_string(b), "-1", b);
+			int tr;
+			temp_reg = regisX_index;			
+			cout << "Rejestr małego a: " << tr << endl; //test
+			addToReg("div("+to_string(b)+")", "-1", b);
 			genNum(b, regisX_index);
-			russianPeasantBinary(a, b);		
+			cout << "Rejestr małego b: " << regisX_index << endl; //test
+			knownDivision(a, b);
+			cout << "RegisX po knownDiv: " << regisX_index << endl;
+			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
+			tr = regisX_index;
+			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
+			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++			
 		}
 		
     	}
@@ -2121,7 +2216,10 @@ void div_function(long long int a, long long int b) { //TODO
 		temp_ll = a / b;
 		cout << "div_function PO (2) -> temp_ll = " << temp_ll << endl;		
 		
-		if (b == 2){
+		if (a < b && a >= 0){
+			rozkazDoKolejki_expression(6, -2, -2);
+		}		
+		else if (b == 2){
 			genNum(a, -2);
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
@@ -2165,13 +2263,21 @@ void div_function(long long int a, long long int b) { //TODO
 		}	
 			
 		else{
-			addToReg(to_string(a), "-1", a);
+			addToReg("DIV(A)", "-1", a);
 			genNum(a, regisX_index);
-			temp_reg = regisX_index;
+			int tr;
+			temp_reg = regisX_index; //A
 			regisY_index = findIndex_value(b);
-			addToReg(to_string(b), "-1", b);
-			rozkazDoKolejki_expression(4, regisX_index, regisY_index);  
-			russianPeasantBinary(a, b);			
+			addToReg("DIV(B)", "-1", b);
+			tr = regisX_index; //B
+			rozkazDoKolejki_expression(4, tr, regisY_index);
+			if (b >= 0)  
+				knownDivision(a, b);
+			else
+				//unknownDivision(a, b);
+			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
+			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
+			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++			
 		}
 		
     	}
@@ -2186,30 +2292,33 @@ void div_function(long long int a, long long int b) { //TODO
 		temp_ll = a / b;
 		cout << "div_function PO (3) -> temp_ll = " << temp_ll << endl;		
 		
-		if (b == 2){
-			genNum(a, -2);
+		if (a < b && a >= 0){
+			rozkazDoKolejki_expression(6, -2, -2);
+		}
+		else if (b == 2){
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 1){
-			genNum(a, -2);
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 		}
 
 		else if (b == 4){
-			genNum(a, -2);
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 8){
-			genNum(a, -2);
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 16){
-			genNum(a, -2);
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
@@ -2217,7 +2326,7 @@ void div_function(long long int a, long long int b) { //TODO
 		}
 
 		else if (b == 32){
-			genNum(a, -2);
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
@@ -2230,19 +2339,27 @@ void div_function(long long int a, long long int b) { //TODO
 		}	
 			
 		else{
-			addToReg(to_string(b), "-1", b);
+			addToReg("DIV(B)", "-1", b);
 			genNum(b, regisX_index);
+			int tr;
 			temp_reg = regisX_index;
 			regisY_index = findIndex_value(a);
-			addToReg(to_string(a), "-1", a);
-			rozkazDoKolejki_expression(4, regisX_index, regisY_index);  
-			russianPeasantBinary(a, b);			
+			addToReg("DIV(A)", "-1", a);
+			tr = regisX_index;
+			rozkazDoKolejki_expression(4, regisX_index, regisY_index);
+			if (a >= 0)  
+				knownDivision(a, b);
+			else
+				//unknownDivision(a, b);
+			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
+			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
+			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++			
 		}
 		
     	}
 
 	// ide / ide
-	else if ( num_ide == 10 ) { 
+	else if ( num_ide == 11 ) { 
         	
 		cout << "div_function PRZED (4) -> temp_ll = " << temp_ll << endl;
 		if (b == 0)
@@ -2250,31 +2367,34 @@ void div_function(long long int a, long long int b) { //TODO
 		else		
 		temp_ll = a / b;
 		cout << "div_function PO (4) -> temp_ll = " << temp_ll << endl;		
-		
-		if (b == 2){
-			genNum(a, -2);
+	
+		if (a < b && a >= 0){
+			rozkazDoKolejki_expression(6, -2, -2);
+		}				
+		else if (b == 2){
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 1){
-			genNum(a, -2);
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 		}
 
 		else if (b == 4){
-			genNum(a, -2);
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 8){
-			genNum(a, -2);
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 16){
-			genNum(a, -2);
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
@@ -2282,7 +2402,7 @@ void div_function(long long int a, long long int b) { //TODO
 		}
 
 		else if (b == 32){
-			genNum(a, -2);
+			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
@@ -2295,13 +2415,23 @@ void div_function(long long int a, long long int b) { //TODO
 		}	
 			
 		else{
-			regisY_index = findIndex_value(a);
-			addToReg(to_string(a), "-1", a);
-			rozkazDoKolejki_expression(4, regisX_index, regisY_index);
-			regisY_index = findIndex_value(b);
-			addToReg(to_string(b), "-1", b);
-			rozkazDoKolejki_expression(4, regisX_index, regisY_index);    
-			russianPeasantBinary(a, b);		
+			int orginal_a, orginal_b, tr;			
+			orginal_b = findIndex_value(b);				
+			addToReg("DIV(B)", "-1", b);
+			genNum(b, regisX_index);
+			temp_reg = regisX_index;
+			orginal_a = findIndex_value(a);
+			addToReg("DIV(A)", "-1", a);
+			tr = regisX_index;
+			rozkazDoKolejki_expression(4, tr, orginal_a);
+			rozkazDoKolejki_expression(4, temp_reg, orginal_b);
+			if (a >= 0 && b >= 0)  
+				knownDivision(a, b);
+			else
+				//unknownDivision(a, b);
+			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
+			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
+			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++
 		}
 		
     	}
@@ -2340,17 +2470,25 @@ void mod_function(long long int a, long long int b) { //TODO
 		}	
 			
 		else{
-			addToReg(to_string(a), "-1", a);
+			addToReg("div("+to_string(a)+")", "-1", a);
 			genNum(a, regisX_index);
-			temp_reg = regisX_index;
-			addToReg(to_string(b), "-1", b);
+			int tr;
+			temp_reg = regisX_index;			
+			cout << "Rejestr małego a: " << tr << endl; //test
+			addToReg("div("+to_string(b)+")", "-1", b);
 			genNum(b, regisX_index);
-			russianPeasantBinary(a, b);		
+			cout << "Rejestr małego b: " << regisX_index << endl; //test
+			knownModulo(a, b);
+			cout << "RegisX po knownDiv: " << regisX_index << endl;
+			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
+			tr = regisX_index;
+			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
+			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++		
 		}
 		
     	}
     
-	// num / ide
+	// num % ide
 	else if ( num_ide == 81 ) { 
         	
 		cout << "mod_function PRZED (2) -> temp_ll = " << temp_ll << endl;
@@ -2379,18 +2517,26 @@ void mod_function(long long int a, long long int b) { //TODO
 		}	
 			
 		else{
-			addToReg(to_string(a), "-1", a);
+			addToReg("DIV(A)", "-1", a);
 			genNum(a, regisX_index);
-			temp_reg = regisX_index;
+			int tr;
+			temp_reg = regisX_index; //A
 			regisY_index = findIndex_value(b);
-			addToReg(to_string(b), "-1", b);
-			rozkazDoKolejki_expression(4, regisX_index, regisY_index);  
-			russianPeasantBinary(a, b);			
+			addToReg("DIV(B)", "-1", b);
+			tr = regisX_index; //B
+			rozkazDoKolejki_expression(4, tr, regisY_index);
+			if (b >= 0)  
+				knownModulo(a, b);
+			else
+				//unknownModulo(a, b);
+			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
+			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
+			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++			
 		}
 		
     	}
 
-	// ide / num
+	// ide % num
 	else if ( num_ide == 10 ) { 
         	
 		cout << "mod_function PRZED (3) -> temp_ll = " << temp_ll << endl;
@@ -2419,18 +2565,26 @@ void mod_function(long long int a, long long int b) { //TODO
 		}	
 			
 		else{
-			addToReg(to_string(b), "-1", b);
+			addToReg("DIV(B)", "-1", b);
 			genNum(b, regisX_index);
+			int tr;
 			temp_reg = regisX_index;
 			regisY_index = findIndex_value(a);
-			addToReg(to_string(a), "-1", a);
-			rozkazDoKolejki_expression(4, regisX_index, regisY_index);  
-			russianPeasantBinary(a, b);			
+			addToReg("DIV(A)", "-1", a);
+			tr = regisX_index;
+			rozkazDoKolejki_expression(4, regisX_index, regisY_index);
+			if (a >= 0)  
+				knownModulo(a, b);
+			else
+				//unknownModulo(a, b);
+			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
+			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
+			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++			
 		}
 		
     	}
 
-	// ide / ide
+	// ide % ide
 	else if ( num_ide == 10 ) { 
         	
 		cout << "mod_function PRZED (4) -> temp_ll = " << temp_ll << endl;
@@ -2459,41 +2613,216 @@ void mod_function(long long int a, long long int b) { //TODO
 		}	
 			
 		else{
-			regisY_index = findIndex_value(a);
-			addToReg(to_string(a), "-1", a);
-			rozkazDoKolejki_expression(4, regisX_index, regisY_index);
-			regisY_index = findIndex_value(b);
-			addToReg(to_string(b), "-1", b);
-			rozkazDoKolejki_expression(4, regisX_index, regisY_index);    
-			russianPeasantBinary(a, b);		
+			int orginal_a, orginal_b, tr;			
+			orginal_b = findIndex_value(b);				
+			addToReg("DIV(B)", "-1", b);
+			genNum(b, regisX_index);
+			temp_reg = regisX_index;
+			orginal_a = findIndex_value(a);
+			addToReg("DIV(A)", "-1", a);
+			tr = regisX_index;
+			rozkazDoKolejki_expression(4, tr, orginal_a);
+			rozkazDoKolejki_expression(4, temp_reg, orginal_b);
+			if (a >= 0 && b >= 0)  
+				knownModulo(a, b);
+			else
+				//unknownModulo(a, b);
+			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
+			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
+			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++		
 		}
 		
     	}
 }
 
-long long int russianPeasantBinary(long long int a, long long int b) {
-	long long int wynik = 0;
+void gt_function(long long int a, long long int b) { //TODO
+
+	cout << "WEJŚCIE DO gt_function: a = " << a << ", b = " << b << endl;		
 	
+	// num > num
+	if ( num_ide == 80 ) { 
+        	
+		cout << "gt_function PRZED (1) -> temp_flag = " << temp_flag << endl;
+		if (a > b)
+			temp_flag = 1;
+		else
+			temp_flag = 0;
+		cout << "gt_function PO (1) -> temp_flag = " << temp_flag << endl;		
+		
+		if (a > b){
+			
+			if (b < 8){
+				addToReg("A>B", "-1", a);
+				temp_reg = regisX_index;
+				genNum_condition(a, temp_reg); 
+				for(int i=0; i < b; i++) {
+                			rozkazDoKolejki_condition(9, temp_reg, -1);
+				}
+            		}
+
+			else{
+				addToReg("A>B(A)", "-1", a);
+				temp_reg = regisX_index;
+				genNum_condition(a, temp_reg);
+				addToReg("A>B(B)", "-1", b);
+				genNum_condition(b, regisX_index);
+				rozkazDoKolejki_condition(6, temp_reg, regisX_index);
+				rozkazDoKolejki_condition(6, regisX_index, regisX_index);	
+				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++			
+									
+			}
+		}
+		
+		else{
+			if (a < 8){
+				addToReg("A>B", "-1", a);
+				temp_reg = regisX_index;
+                		rozkazDoKolejki_condition(6, temp_reg, temp_reg);
+            		}
+
+			else{
+				addToReg("A>B", "-1", a);
+				temp_reg = regisX_index;
+                		rozkazDoKolejki_condition(6, temp_reg, temp_reg);
+									
+			}
+		}	
+		
+    	}
+    
+	// num > ide
+	else if ( num_ide == 81 ) { 
+        	
+		cout << "gt_function PRZED (2) -> temp_flag = " << temp_flag << endl;
+		if (b >= 0){
+			if (a > b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "gt_function PO (2) -> temp_flag = " << temp_flag << endl;		
+		
+		if (a <= b && b >= 0){
+			addToReg("A>B", "-1", a);
+			temp_reg = regisX_index;
+			rozkazDoKolejki_condition(6, temp_reg, temp_reg);
+		}
+		else{	
+			addToReg("A>B", "-1", a);
+			temp_reg = regisX_index;       
+			genNum_condition(a, temp_reg);
+			if (b < 8 && b >= 0){ 
+				for(int i=0; i < b; i++) {
+	                		rozkazDoKolejki_condition(9, temp_reg, -1);
+				}
+            		}
+			else{
+				regisY_index = findIndex_value(b);
+				rozkazDoKolejki_condition(6, temp_reg, regisY_index);	
+			}
+	        }
+    	}
+
+	// ide > num
+	else if ( num_ide == 10 ) { 
+        	
+		cout << "mod_function PRZED (3) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0){
+			if (a > b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "mod_function PO (3) -> temp_flag = " << temp_flag << endl;
+
+		if (a <= b && a >= 0){
+			addToReg("A>B", "-1", a);
+			temp_reg = regisX_index;
+			rozkazDoKolejki_condition(6, temp_reg, temp_reg);
+		}
+		else{
+			addToReg("A>B", "-1", a);
+			temp_reg = regisX_index;
+			regisY_index = findIndex_value(a);		
+			rozkazDoKolejki_condition(4, temp_reg, regisY_index);		
+
+			if (b < 8){ 
+				for(int i=0; i < b; i++) {
+                			rozkazDoKolejki_condition(9, temp_reg, -1);
+				}
+            		}
+			else{
+				addToReg("A>B(B)", "-1", b);
+				genNum_condition(b, regisX_index);			
+				rozkazDoKolejki_condition(6, temp_reg, regisX_index);
+				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++	
+			}
+	        }		
+		
+    	}
+
+	// ide > ide
+	else if ( num_ide == 10 ) { 
+        	
+		cout << "mod_function PRZED (4) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0 && b >= 0){
+			if (a > b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "mod_function PO (4) -> temp_flag = " << temp_flag << endl;
+
+		if (a <= b && a >= 0) {
+			addToReg("A>B", "-1", a);
+			temp_reg = regisX_index;
+			rozkazDoKolejki_condition(6, temp_reg, temp_reg);
+        	}
+
+	        else {
+			addToReg("A>B", "-1", a);
+			temp_reg = regisX_index;
+			regisY_index = findIndex_value(a);
+			rozkazDoKolejki_condition(4, temp_reg, regisY_index);
+			regisX_index = findIndex_value(b);
+			rozkazDoKolejki_condition(6, temp_reg, regisX_index);
+        	}		
+		
+    	}
+}
+
+void unknownMultiplication(long long int a, long long int b) {
+	//long long int wynik = 0;
+	rozkazDoKolejki_expression(6, -2, -2); // SUB C C
 	regisX_index = findIndex_value(b);
 	regisY_index = findIndex_value(a);
-	rozkazDoKolejki_expression(6, -2, -2); // SUB C C
+	
 	rozkazDoKolejki_expression(11, regisX_index, -1); // TODO obliczyć trzeci argument JZERO B j
       
-	while (b > 0) {
+	//while (b > 0) {
 	rozkazDoKolejki_expression(8, regisX_index, -1); // INC B
 	rozkazDoKolejki_expression(12, regisX_index, -1); // JODD B		
-		if (b%2 == 1){
+		//if (b%2 == 1){
 			rozkazDoKolejki_expression(5, -2, regisY_index); // ADD C A
-			wynik += a;
-		}
+			//wynik += a;
+		//}
 	rozkazDoKolejki_expression(9, regisX_index, -1); // DEC B
 	rozkazDoKolejki_expression(5, regisY_index, regisY_index); // ADD A A
-        a <<= 1;
+        //a <<= 1;
 	rozkazDoKolejki_expression(7, regisX_index, -1); // ADD A A
-        b >>= 1;
-      }
+        //b >>= 1;
+      //}
 	rozkazDoKolejki_expression(10, -1, -1); // TODO JUMP j+7
-	return wynik;
+	//return wynik;
     }
 
 void knownMultiplication(long long int a, long long int b) {
@@ -2516,14 +2845,186 @@ void knownMultiplication(long long int a, long long int b) {
       }
     }
 
-long long int dzielenie(long long int a, long long int b) {
-	if (b==0) return 0;		
-	long long int wynik = 0;
-	while (a > 0){
-		a = a-b;
-		wynik++;			
+void unknownDivision(long long a, long long b){ //TODO
+	
+	// X := A / B, X == D
+	int regC_index;
+	addToReg("div(C)", "-1", 1);
+	regC_index = regisX_index;
+	
+	long long c = 1; // SUB C C, INC C
+	rozkazDoKolejki_expression(6, regC_index, regC_index); // SUB C C
+	rozkazDoKolejki_expression(8, regC_index, -1); // INC C
+
+	
+	long long d = 0; // SUB D D
+	rozkazDoKolejki_expression(6, -2, -2); // SUB D D
+
+	
+	regisY_index = findIndex_value(a); // A
+	regisX_index = findIndex_value(b); // B	
+	
+
+	while(a > b){ // JZERO E n+3, ale dla jakiegoś E = A - B
+		b = b + b;	// ADD B B
+		rozkazDoKolejki_expression(5, regisX_index, regisX_index); // ADD B B
+		c = c + c;	// ADD C C
+		rozkazDoKolejki_expression(5, regC_index, regC_index); // ADD C C
 	}
-	return wynik;
+
+
+	do {
+		if (a >= b) {
+			a = a - b; // SUB A B
+			rozkazDoKolejki_expression(6, regisY_index, regisX_index); // SUB A B
+			d = d + c; // ADD D C
+			rozkazDoKolejki_expression(5, -2, regC_index); // ADD D C
+		}
+	
+	b = b / 2; // HALF B
+	rozkazDoKolejki_expression(7, regisX_index, -1); // HALF B
+	c = c / 2; // HALF C
+	rozkazDoKolejki_expression(7, regC_index, -1); // HALF B
+	
+	} while (c != 0);
+		
+	rozkazDoKolejki_expression(-2, regC_index, 0); // usuwam rejestr C w C++, ponieważ c==0	
+	//return d; //dzielenie
+	// return a; //modulo
+
+}
+
+void knownDivision(long long a, long long b){ 
+	
+	// X := A / B, X == D
+	int regC_index;
+	addToReg("div(C)", "-1", 1);
+	regC_index = regisX_index;
+	
+	long long c = 1; // SUB C C, INC C
+	rozkazDoKolejki_expression(6, regC_index, regC_index); // SUB C C
+	rozkazDoKolejki_expression(8, regC_index, -1); // INC C
+
+	
+	long long d = 0; // SUB D D
+	rozkazDoKolejki_expression(6, -2, -2); // SUB D D
+
+	
+	regisY_index = findIndex_value(a); // A
+	regisX_index = findIndex_value(b); // B
+	cout << "DUPA regisX_index: " << regisX_index << endl;	
+	
+
+	while(a > b){ 
+		b = b + b;	// ADD B B
+		rozkazDoKolejki_expression(5, regisX_index, regisX_index); // ADD B B
+		c = c + c;	// ADD C C
+		rozkazDoKolejki_expression(5, regC_index, regC_index); // ADD C C
+	}
+
+
+	do {
+		if (a >= b) {
+			a = a - b; // SUB A B
+			rozkazDoKolejki_expression(6, regisY_index, regisX_index); // SUB A B
+			d = d + c; // ADD D C
+			rozkazDoKolejki_expression(5, -2, regC_index); // ADD D C
+		}
+	
+	b = b / 2; // HALF B
+	rozkazDoKolejki_expression(7, regisX_index, -1); // HALF B
+	c = c / 2; // HALF C
+	rozkazDoKolejki_expression(7, regC_index, -1); // HALF B
+	
+	} while (c != 0);
+		
+	rozkazDoKolejki_expression(-2, regC_index, 0); // usuwam rejestr C w C++, ponieważ c==0	
+	//return d; //dzielenie
+	// return a; //modulo
+
+}
+
+void unknownModulo(long long a, long long b){
+	
+	// X := A % B, X == A
+
+	long long c = 1;
+	long long d = 0;
+
+	if (b == 0){
+		//return 0;
+	}
+
+	while(a > b){
+		b = b + b;
+		c = c + c;
+	}
+
+
+	do {
+		if (a >= b) {
+			a = a - b;
+			d = d + c;
+		}
+	
+	b = b / 2;
+	c = c / 2;
+	
+	} while (c != 0);
+		
+		
+	//return a; //modulo
+
+}
+
+void knownModulo(long long a, long long b){ 
+	
+	int regC_index;
+	addToReg("div(C)", "-1", 1);
+	regC_index = regisX_index;
+	
+	long long c = 1; // SUB C C, INC C
+	rozkazDoKolejki_expression(6, regC_index, regC_index); // SUB C C
+	rozkazDoKolejki_expression(8, regC_index, -1); // INC C
+
+	
+	long long d = 0; // SUB D D
+	rozkazDoKolejki_expression(6, -2, -2); // SUB D D
+
+	
+	regisY_index = findIndex_value(a); // A
+	regisX_index = findIndex_value(b); // B
+	cout << "DUPA regisX_index: " << regisX_index << endl;	
+	
+
+	while(a > b){ 
+		b = b + b;	// ADD B B
+		rozkazDoKolejki_expression(5, regisX_index, regisX_index); // ADD B B
+		c = c + c;	// ADD C C
+		rozkazDoKolejki_expression(5, regC_index, regC_index); // ADD C C
+	}
+
+
+	do {
+		if (a >= b) {
+			a = a - b; // SUB A B
+			rozkazDoKolejki_expression(6, regisY_index, regisX_index); // SUB A B
+			d = d + c; // ADD D C
+			rozkazDoKolejki_expression(5, -2, regC_index); // ADD D C
+		}
+	
+	b = b / 2; // HALF B
+	rozkazDoKolejki_expression(7, regisX_index, -1); // HALF B
+	c = c / 2; // HALF C
+	rozkazDoKolejki_expression(7, regC_index, -1); // HALF B
+	
+	} while (c != 0);
+	
+	rozkazDoKolejki_expression(4, -2, regisY_index); // COPY D A 	
+	rozkazDoKolejki_expression(-2, regC_index, 0); // usuwam rejestr C w C++, ponieważ c==0	
+	//return d; //dzielenie
+	// return a; //modulo
+
 }
 
 void pokazRejestr(){ //DO USUNIĘCIA W OSTATECZNEJ WERSJI
@@ -2547,7 +3048,7 @@ int findIndex(string name){
 
 int findIndex_value(long long int value){
 	int ind, end;	
-	for (int i=0; i<8; i++){
+	for (int i=7; i>=0; i--){
 		ind=i;			
 		if(regis_value[i] == value){
 			break;
@@ -2581,9 +3082,14 @@ void addToReg(string name, string empty_name, long long int value){
 				cout << name << " nie jest w rejestrze -> dodawanie (wszedł ELSE IF)" << endl;
 				regis_name[i] = name;
 				regis_value[i] = value;
+				end = true;
 				break;
 			}
 		}
+	}
+
+	if (!end){
+		cout << "REJESTR PEŁNY!!!" << endl;
 	}
 }
 
@@ -2598,6 +3104,13 @@ void rozkazDoKolejki_expression(int nr_rozkazu, int rX, int rY){
 	rozkazy_expression[rozkazy_index_expression][1] = rX;
 	rozkazy_expression[rozkazy_index_expression][2] = rY;
 	rozkazy_index_expression++;
+}
+
+void rozkazDoKolejki_condition(int nr_rozkazu, int rX, int rY){
+	rozkazy_condition[rozkazy_index_condition][0] = nr_rozkazu;
+	rozkazy_condition[rozkazy_index_condition][1] = rX;
+	rozkazy_condition[rozkazy_index_condition][2] = rY;
+	rozkazy_index_condition++;
 }
 
 void rozkazDoKolejki(int nr_rozkazu, int rX, int rY){
@@ -2700,6 +3213,46 @@ void wykonajRozkazy_expression(){
 	}
 
 	rozkazy_index_expression=0;
+}
+
+void wykonajRozkazy_condition(){	
+
+	for (int i=0; i<rozkazy_index_condition; i++){
+	
+		if (rozkazy_condition[i][0]==-1)
+			break;
+		else{
+		
+			if (rozkazy_condition[i][1] == -2)
+				rozkazy_condition[i][1] = regisX_index;
+			else if (rozkazy_condition[i][1] == -3)
+				rozkazy_condition[i][1] = regisY_index;
+
+			if (rozkazy_condition[i][2] == -2)
+				rozkazy_condition[i][2] = regisX_index;
+			else if (rozkazy_condition[i][2] == -3)
+				rozkazy_condition[i][2] = regisY_index;
+			else if (rozkazy_condition[i][2] == -4){
+				cout << "(i) = " << i << endl;
+				rozkazy_condition[i][2] = rozkazy_index_condition - i + 100; 								
+				jump = i;
+			}
+			rozkazDoKolejki(rozkazy_condition[i][0], rozkazy_condition[i][1], rozkazy_condition[i][2]);
+			
+		}
+	}
+
+	cout << "Wyjście z pętli" << endl;
+
+	for (int i=0; i<100; i++){
+		rozkazy_condition[i][0]=-1;
+		rozkazy_condition[i][1]=-1;
+		rozkazy_condition[i][2]=-1;
+	}
+
+	cout << "Końcowe rozkazy_index_condition = " << rozkazy_index_condition << endl;
+	jump = rozkazy_index_condition - jump;
+	rozkazy_index_condition=0;
 }
 
 int main(int argv, char* argc[]){
