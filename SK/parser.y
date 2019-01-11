@@ -1,5 +1,6 @@
 %{
 #include <iostream>
+#include <fstream>
 #include <string.h>
 #include <cstdlib>
 #include <stdlib.h>
@@ -14,8 +15,6 @@ typedef struct {
 	string type; //NUMBER, IDENTIFIER, ARRAY
 	int initialized;
 	int counter;
-	int reg;
-//	long long int mem;
 	long long int local;
 	long long int tableStart;
 	long long int tableEnd;
@@ -53,6 +52,9 @@ void mul_function(long long int a, long long int b);
 void div_function(long long int a, long long int b);
 void mod_function(long long int a, long long int b);
 void gt_function(long long int a, long long int b);
+void lt_function(long long int a, long long int b);
+void ge_function(long long int a, long long int b);
+void le_function(long long int a, long long int b);
 void knownMultiplication(long long int a, long long int b);
 void unknownMultiplication(long long int a, long long int b);
 void knownDivision(long long int a, long long int b);
@@ -70,6 +72,7 @@ void wykonajRozkazy_condition();
 bool assignFlag;
 bool errFlag;
 int temp_reg = -1;
+int condition_reg = -1;
 long long int depth;
 Identifier assignTarget;
 string tabAssignTargetIndex = "-1";
@@ -123,6 +126,7 @@ int num_ide = -1; // 0 -> num, 1 -> identifier
 int dzialanie_przemienne = -1; // 0 -> / - ; 1 -> * +
 int krok = 0;
 int jump = 0;
+fstream fout;
 
 %}
 
@@ -151,6 +155,7 @@ int jump = 0;
 program:
 	DECLARE declarations IN commands END {
 		pushCommand("HALT", -1, -1);
+		fout.close();
 	}
 ;
 
@@ -380,7 +385,7 @@ command:
 		cout << "Jestem w IF condition THEN { " << endl; //test
 		cout << "wykonuje: wykonajRozkazy_condition();" << endl; 			
 		wykonajRozkazy_condition();
-		rozkazDoKolejki_condition(11, temp_reg, -4); //pushCommand("JZERO", temp_reg, krok + x);
+		rozkazDoKolejki_condition(11, condition_reg, -4); //pushCommand("JZERO", temp_reg, krok + x);
 		cout << "wykonuje: wykonajRozkazy();" << endl;
 		wykonajRozkazy();
 		
@@ -391,34 +396,11 @@ command:
 |	WHILE { 
 		assignFlag = false; 
 		depth++; 
-		Jump j;
-        	createJump(&j, codeStack.size(), depth);
-        	jumpStack.push_back(j);	
+			
 	} condition { assignFlag = true; } DO commands ENDWHILE {
-	
-		long long int stack;
-        	long long int jumpCount = jumpStack.size()-1;
         
-		if(jumpCount > 2 && jumpStack.at(jumpCount-2).depth == depth) {
-            		stack = jumpStack.at(jumpCount-2).placeInStack;
-            		pushCommand("JUMP", stack+100, -1);
-            		//addInt(jumpStack.at(jumpCount).placeInStack, codeStack.size());
-			codeStack.at(jumpStack.at(jumpCount).placeInStack) = codeStack.at(jumpStack.at(jumpCount).placeInStack) + " " + to_string(codeStack.size());
-            		//addInt(jumpStack.at(jumpCount-1).placeInStack, codeStack.size());
-			codeStack.at(jumpStack.at(jumpCount-1).placeInStack) = codeStack.at(jumpStack.at(jumpCount-1).placeInStack) + " " + to_string(codeStack.size());
-            		jumpStack.pop_back();
-        	}
-        	else {
-            		stack = jumpStack.at(jumpCount-1).placeInStack;
-            		pushCommand("JUMP", stack+100, -1);
-            		//addInt(jumpStack.at(jumpCount).placeInStack, codeStack.size());
-			codeStack.at(jumpStack.at(jumpCount).placeInStack) = codeStack.at(jumpStack.at(jumpCount).placeInStack) + " " + to_string(codeStack.size());
-        	}
-        
-		jumpStack.pop_back();
-        	jumpStack.pop_back();
 
-        	/*registerValue = -1;*/
+        	
         	depth--;
         	assignFlag = true;
 
@@ -427,6 +409,7 @@ command:
 |	DO commands WHILE condition END DO {
 	
 	}
+
 |	FOR pidentifier {
         			if(identifierStack.find($2)!=identifierStack.end()) {
 					string err = $2;
@@ -494,9 +477,9 @@ if_body:
         	wykonajRozkazy_condition();
 		wykonajRozkazy();
 		cout << "Wykonałem rozkazy w ELSE" << endl;
-		rozkazDoKolejki_condition(12, temp_reg, -4); //JODD X 
-		rozkazDoKolejki_condition(9, temp_reg, -1); // DEC X
-		rozkazDoKolejki_condition(12, temp_reg, -4); // JODD X
+		rozkazDoKolejki_condition(12, condition_reg, -4); //JODD X 
+		rozkazDoKolejki_condition(9, condition_reg, -1); // DEC X
+		rozkazDoKolejki_condition(12, condition_reg, -4); // JODD X
 	        assignFlag = true;
 
 	} commands ENDIF {
@@ -593,23 +576,10 @@ for_body:
 	
 	        Identifier iterator = forStack.at(forStack.size()-1);
 	        //rejestr
-	        pushCommand("INC it", -1, -1);
-	        //rejestr
-
-        	long long int jumpCount = jumpStack.size()-1;
-        	long long int stack = jumpStack.at(jumpCount).placeInStack-1;
-        
-		pushCommand("JUMP", stack+100, -1);
-        
-		//addInt(jumpStack.at(jumpCount).placeInStack, codeStack.size());
-		codeStack.at(jumpStack.at(jumpCount).placeInStack) = codeStack.at(jumpStack.at(jumpCount).placeInStack) + " " + to_string(codeStack.size());
-	        jumpStack.pop_back();
-
-        	string name = "C" + to_string(depth);
-        	removeIdentifier(name);
+	     
+        	//removeIdentifier(name);
         	removeIdentifier(iterator.name);
-        	forStack.pop_back();
-
+        	
         	depth--;
         	assignFlag = true;
     }
@@ -1163,89 +1133,185 @@ condition:
 		expressionArguments[0] = "-1";
 		expressionArguments[1] = "-1";
 	}
-|	value LT value {
-	
-			Identifier a = identifierStack.at(expressionArguments[0]);
-        		Identifier b = identifierStack.at(expressionArguments[1]);
+|	value LT value { //dupa
 
-        		if(a.type == "NUMBER" && b.type == "NUMBER") {
-            
-				if(stoll(a.name) > stoll(b.name))
- 	               			cout << "PRAWDA" << endl;
-            			else
-                			cout << "FAŁSZ" << endl;
-            
-				removeIdentifier(a.name);
-            			removeIdentifier(b.name);
-        		}
+		cout << "Jestem w value LT value" << endl;
+
+		dzialanie_przemienne = 0;
+
+		//	num < num	ide < ide	num < ide	ide < num	
+		if(num_ide == 80 || num_ide == 11 || num_ide == 81 || num_ide == 10){
+            			
+			long long int a;
+			long long int b; 
+
+			if (num_ide == 80){
+				a = atoll($1);
+				b = atoll($3);
+			}
+
+			else if (num_ide == 11){				
+				int a_ind = findIndex($1);
+				int b_ind = findIndex($3);
+				cout << "v<v n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
+				a = regis_value[a_ind];
+				b = regis_value[b_ind];
+				cout << "v<v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+			}
+
+			else if (num_ide == 81){
+				a = atoll($1);
+				int b_ind = findIndex($3);
+				b = regis_value[b_ind];
+			}
+
+			else if (num_ide == 10){
+				int a_ind = findIndex($1);
+				a = regis_value[a_ind];
+				b = atoll($3);
+			}  
+
+
+			lt_function(a, b);
+		}
         
-			else {
-	            		cout << "Porównywanie innych typów na razie za trudne" << endl;
-        		}
+		else {
+	            		/*Identifier aI, bI;
+	
+	            		if(identifierStack.count(argumentsTabIndex[0]) > 0)
+	                		aI = identifierStack.at(argumentsTabIndex[0]);
 
-        		Jump j;
-        		createJump(&j, codeStack.size(), depth);
-        		jumpStack.push_back(j);
-        		pushCommand("JZERO", 100, -1);
+	            		if(identifierStack.count(argumentsTabIndex[1]) > 0)
+	                		bI = identifierStack.at(argumentsTabIndex[1]);
 
-        		expressionArguments[0] = "-1";
-        		expressionArguments[1] = "-1";
+	            		addTab(a, b, aI, bI);
+
+	            		argumentsTabIndex[0] = "-1";
+	            		argumentsTabIndex[1] = "-1"; */
+		}
+
+		expressionArguments[0] = "-1";
+		expressionArguments[1] = "-1";
 	}
-|	value LE value {
-	
-			Identifier a = identifierStack.at(expressionArguments[0]);
-        		Identifier b = identifierStack.at(expressionArguments[1]);
+|	value LE value { //dupa
 
-        		if(a.type == "NUMBER" && b.type == "NUMBER") {
-            
-				if(stoll(a.name) <= stoll(b.name))
- 	               			cout << "PRAWDA" << endl;
-            			else
-                			cout << "FAŁSZ" << endl;
-            
-				removeIdentifier(a.name);
-            			removeIdentifier(b.name);
-        		}
+		cout << "Jestem w value LE value" << endl;
+
+		dzialanie_przemienne = 0;
+
+		//	num <= num	ide <= ide	num <= ide	ide <= num	
+		if(num_ide == 80 || num_ide == 11 || num_ide == 81 || num_ide == 10){
+            			
+			long long int a;
+			long long int b; 
+
+			if (num_ide == 80){
+				a = atoll($1);
+				b = atoll($3);
+			}
+
+			else if (num_ide == 11){				
+				int a_ind = findIndex($1);
+				int b_ind = findIndex($3);
+				cout << "v<=v n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
+				a = regis_value[a_ind];
+				b = regis_value[b_ind];
+				cout << "v<=v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+			}
+
+			else if (num_ide == 81){
+				a = atoll($1);
+				int b_ind = findIndex($3);
+				b = regis_value[b_ind];
+			}
+
+			else if (num_ide == 10){
+				int a_ind = findIndex($1);
+				a = regis_value[a_ind];
+				b = atoll($3);
+			}  
+
+
+			le_function(a, b);
+		}
         
-			else {
-	            		cout << "Porównywanie innych typów na razie za trudne" << endl;
-        		}
+		else {
+	            		/*Identifier aI, bI;
+	
+	            		if(identifierStack.count(argumentsTabIndex[0]) > 0)
+	                		aI = identifierStack.at(argumentsTabIndex[0]);
 
-        		Jump j;
-        		createJump(&j, codeStack.size(), depth);
-        		jumpStack.push_back(j);
-        		pushCommand("JZERO", 100, -1);
+	            		if(identifierStack.count(argumentsTabIndex[1]) > 0)
+	                		bI = identifierStack.at(argumentsTabIndex[1]);
 
-        		expressionArguments[0] = "-1";
-        		expressionArguments[1] = "-1";
+	            		addTab(a, b, aI, bI);
+
+	            		argumentsTabIndex[0] = "-1";
+	            		argumentsTabIndex[1] = "-1"; */
+		}
+
+		expressionArguments[0] = "-1";
+		expressionArguments[1] = "-1";
 	}
-|	value GE value {
-	
-			Identifier a = identifierStack.at(expressionArguments[0]);
-        		Identifier b = identifierStack.at(expressionArguments[1]);
+|	value GE value { //dupa
 
-        		if(a.type == "NUMBER" && b.type == "NUMBER") {
-            
-				if(stoll(a.name) >= stoll(b.name))
- 	               			cout << "PRAWDA" << endl;
-            			else
-                			cout << "FAŁSZ" << endl;
-            
-				removeIdentifier(a.name);
-            			removeIdentifier(b.name);
-        		}
+		cout << "Jestem w value GE value" << endl;
+
+		dzialanie_przemienne = 0;
+
+		//	num >= num	ide >= ide	num >= ide	ide >= num	
+		if(num_ide == 80 || num_ide == 11 || num_ide == 81 || num_ide == 10){
+            			
+			long long int a;
+			long long int b; 
+
+			if (num_ide == 80){
+				a = atoll($1);
+				b = atoll($3);
+			}
+
+			else if (num_ide == 11){				
+				int a_ind = findIndex($1);
+				int b_ind = findIndex($3);
+				cout << "v>=v n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
+				a = regis_value[a_ind];
+				b = regis_value[b_ind];
+				cout << "v>=v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+			}
+
+			else if (num_ide == 81){
+				a = atoll($1);
+				int b_ind = findIndex($3);
+				b = regis_value[b_ind];
+			}
+
+			else if (num_ide == 10){
+				int a_ind = findIndex($1);
+				a = regis_value[a_ind];
+				b = atoll($3);
+			}  
+
+
+			ge_function(a, b);
+		}
         
-			else {
-	            		cout << "Porównywanie innych typów na razie za trudne" << endl;
-        		}
+		else {
+	            		/*Identifier aI, bI;
+	
+	            		if(identifierStack.count(argumentsTabIndex[0]) > 0)
+	                		aI = identifierStack.at(argumentsTabIndex[0]);
 
-        		Jump j;
-        		createJump(&j, codeStack.size(), depth);
-        		jumpStack.push_back(j);
-        		pushCommand("JZERO", 100, -1);
+	            		if(identifierStack.count(argumentsTabIndex[1]) > 0)
+	                		bI = identifierStack.at(argumentsTabIndex[1]);
 
-        		expressionArguments[0] = "-1";
-        		expressionArguments[1] = "-1";
+	            		addTab(a, b, aI, bI);
+
+	            		argumentsTabIndex[0] = "-1";
+	            		argumentsTabIndex[1] = "-1"; */
+		}
+
+		expressionArguments[0] = "-1";
+		expressionArguments[1] = "-1";
 	}
 ;
 
@@ -1295,6 +1361,8 @@ value:
 
 identifier:
 	pidentifier {
+
+		cout << "PIDENTIFIER: " << endl;
 
 		temp_str = $1;
 		if(identifierStack.find($1) == identifierStack.end()) {
@@ -1406,18 +1474,21 @@ identifier:
 void pushCommand(string str, int r1, int r2){
 	if (r2 == -1){
 		if (r1 == -1){
+			fout << krok << ": " << str << endl;
 			cout << krok++ << ": " << str << endl;
 			//codeStack.push_back(str);
 		}
 		
 		else{
 			char r = 'A'+r1;
+			fout << krok << ": " << str << " " << r << endl;
 			cout << krok++ << ": " << str << " " << r << endl;
 			//codeStack.push_back(str);
 		}
 	}
 	else if (r2 > 100){
 		char r = 'A'+r1;
+			fout << krok << ": " << str << " " << r << " " << krok + r2 - 100 << endl;
 			cout << krok++ << ": " << str << " " << r << " " << krok + r2 - 100 << endl;
 			cout << "krok = " << krok << endl;
 			cout << "r2 = " << r2 << endl;
@@ -1426,6 +1497,7 @@ void pushCommand(string str, int r1, int r2){
 	else{
 		char a = 'A'+r1;
 		char b = 'A'+r2;
+		fout << krok << ": " << str << " " << a << " " << b << endl;
 		cout << krok++ << ": " << str << " " << a << " " << b << endl;
 		//codeStack.push_back(str);	
 	}
@@ -1439,9 +1511,9 @@ void createJump(Jump *j, long long int stack, long long int depth) {
 void createIdentifier(Identifier *s, string name, long long int isLocal,
     long long int tableStart, long long int tableEnd, string type){
     s->name = name;
-//    s->mem = memCounter;
+
     s->type = type;
-    s->reg = 0;	
+  	
     s->initialized = 0;
     if(isLocal){
     	s->local = 1;
@@ -2585,7 +2657,7 @@ void mod_function(long long int a, long long int b) { //TODO
     	}
 
 	// ide % ide
-	else if ( num_ide == 10 ) { 
+	else if ( num_ide == 11 ) { 
         	
 		cout << "mod_function PRZED (4) -> temp_ll = " << temp_ll << endl;
 		if (b == 0)
@@ -2653,20 +2725,20 @@ void gt_function(long long int a, long long int b) { //TODO
 			
 			if (b < 8){
 				addToReg("A>B", "-1", a);
-				temp_reg = regisX_index;
-				genNum_condition(a, temp_reg); 
+				condition_reg = regisX_index;
+				genNum_condition(a, condition_reg); 
 				for(int i=0; i < b; i++) {
-                			rozkazDoKolejki_condition(9, temp_reg, -1);
+                			rozkazDoKolejki_condition(9, condition_reg, -1);
 				}
             		}
 
 			else{
 				addToReg("A>B(A)", "-1", a);
-				temp_reg = regisX_index;
-				genNum_condition(a, temp_reg);
+				condition_reg = regisX_index;
+				genNum_condition(a, condition_reg);
 				addToReg("A>B(B)", "-1", b);
 				genNum_condition(b, regisX_index);
-				rozkazDoKolejki_condition(6, temp_reg, regisX_index);
+				rozkazDoKolejki_condition(6, condition_reg, regisX_index);
 				rozkazDoKolejki_condition(6, regisX_index, regisX_index);	
 				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++			
 									
@@ -2674,18 +2746,11 @@ void gt_function(long long int a, long long int b) { //TODO
 		}
 		
 		else{
-			if (a < 8){
-				addToReg("A>B", "-1", a);
-				temp_reg = regisX_index;
-                		rozkazDoKolejki_condition(6, temp_reg, temp_reg);
-            		}
+			
+				addToReg("A>B", "-1", 0);
+				condition_reg = regisX_index;
+                		rozkazDoKolejki_condition(6, condition_reg, condition_reg);
 
-			else{
-				addToReg("A>B", "-1", a);
-				temp_reg = regisX_index;
-                		rozkazDoKolejki_condition(6, temp_reg, temp_reg);
-									
-			}
 		}	
 		
     	}
@@ -2707,21 +2772,21 @@ void gt_function(long long int a, long long int b) { //TODO
 		
 		if (a <= b && b >= 0){
 			addToReg("A>B", "-1", a);
-			temp_reg = regisX_index;
-			rozkazDoKolejki_condition(6, temp_reg, temp_reg);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
 		}
 		else{	
 			addToReg("A>B", "-1", a);
-			temp_reg = regisX_index;       
-			genNum_condition(a, temp_reg);
+			condition_reg = regisX_index;       
+			genNum_condition(a, condition_reg);
 			if (b < 8 && b >= 0){ 
 				for(int i=0; i < b; i++) {
-	                		rozkazDoKolejki_condition(9, temp_reg, -1);
+	                		rozkazDoKolejki_condition(9, condition_reg, -1);
 				}
             		}
 			else{
 				regisY_index = findIndex_value(b);
-				rozkazDoKolejki_condition(6, temp_reg, regisY_index);	
+				rozkazDoKolejki_condition(6, condition_reg, regisY_index);	
 			}
 	        }
     	}
@@ -2729,7 +2794,7 @@ void gt_function(long long int a, long long int b) { //TODO
 	// ide > num
 	else if ( num_ide == 10 ) { 
         	
-		cout << "mod_function PRZED (3) -> temp_flag = " << temp_flag << endl;
+		cout << "gt_function PRZED (3) -> temp_flag = " << temp_flag << endl;
 		if (a >= 0){
 			if (a > b)
 				temp_flag = 1;
@@ -2739,38 +2804,41 @@ void gt_function(long long int a, long long int b) { //TODO
 		else{
 			temp_flag = -1;
 		}
-		cout << "mod_function PO (3) -> temp_flag = " << temp_flag << endl;
+		cout << "gt_function PO (3) -> temp_flag = " << temp_flag << endl;
 
 		if (a <= b && a >= 0){
 			addToReg("A>B", "-1", a);
-			temp_reg = regisX_index;
-			rozkazDoKolejki_condition(6, temp_reg, temp_reg);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
 		}
 		else{
-			addToReg("A>B", "-1", a);
-			temp_reg = regisX_index;
+			addToReg("A>B", "-1", -120);
+			condition_reg = regisX_index;
 			regisY_index = findIndex_value(a);		
-			rozkazDoKolejki_condition(4, temp_reg, regisY_index);		
+			rozkazDoKolejki_condition(4, condition_reg, regisY_index);
+			addToReg("A>B", "-1", a);		
 
 			if (b < 8){ 
 				for(int i=0; i < b; i++) {
-                			rozkazDoKolejki_condition(9, temp_reg, -1);
+                			rozkazDoKolejki_condition(9, condition_reg, -1);
 				}
+				addToReg("A>B", "-1", a - b);
             		}
 			else{
 				addToReg("A>B(B)", "-1", b);
 				genNum_condition(b, regisX_index);			
-				rozkazDoKolejki_condition(6, temp_reg, regisX_index);
-				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++	
+				rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++
+				addToReg("A>B", "-1", a - b);	
 			}
 	        }		
 		
     	}
 
 	// ide > ide
-	else if ( num_ide == 10 ) { 
+	else if ( num_ide == 11 ) { 
         	
-		cout << "mod_function PRZED (4) -> temp_flag = " << temp_flag << endl;
+		cout << "gt_function PRZED (4) -> temp_flag = " << temp_flag << endl;
 		if (a >= 0 && b >= 0){
 			if (a > b)
 				temp_flag = 1;
@@ -2780,21 +2848,539 @@ void gt_function(long long int a, long long int b) { //TODO
 		else{
 			temp_flag = -1;
 		}
-		cout << "mod_function PO (4) -> temp_flag = " << temp_flag << endl;
+		cout << "gt_function PO (4) -> temp_flag = " << temp_flag << endl;
 
 		if (a <= b && a >= 0) {
 			addToReg("A>B", "-1", a);
-			temp_reg = regisX_index;
-			rozkazDoKolejki_condition(6, temp_reg, temp_reg);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
         	}
 
 	        else {
-			addToReg("A>B", "-1", a);
-			temp_reg = regisX_index;
+			addToReg("A>B", "-1", 0);
+			condition_reg = regisX_index;
 			regisY_index = findIndex_value(a);
-			rozkazDoKolejki_condition(4, temp_reg, regisY_index);
+			rozkazDoKolejki_condition(4, condition_reg, regisY_index);
 			regisX_index = findIndex_value(b);
-			rozkazDoKolejki_condition(6, temp_reg, regisX_index);
+			rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+			if (a >= 0 && b >= 0)
+				addToReg("A>B", "-1", a - b);
+			else
+				addToReg("A>B", "-1", -11);
+        	}		
+		
+    	}
+}
+
+void lt_function(long long int a, long long int b) { //TODO
+
+	cout << "WEJŚCIE DO lt_function: a = " << a << ", b = " << b << endl;		
+	
+	// num < num
+	if ( num_ide == 80 ) { 
+        	
+		cout << "lt_function PRZED (1) -> temp_flag = " << temp_flag << endl;
+		if (a < b)
+			temp_flag = 1;
+		else
+			temp_flag = 0;
+		cout << "lt_function PO (1) -> temp_flag = " << temp_flag << endl;		
+		
+		if (b > a){
+			
+			if (a < 8){
+				addToReg("A<B", "-1", b);
+				condition_reg = regisX_index;
+				genNum_condition(b, condition_reg); 
+				for(int i=0; i < a; i++) {
+                			rozkazDoKolejki_condition(9, condition_reg, -1);
+				}
+            		}
+
+			else{
+				addToReg("A<B(A)", "-1", b);
+				condition_reg = regisX_index;
+				genNum_condition(b, condition_reg);
+				addToReg("A<B(B)", "-1", a);
+				genNum_condition(a, regisX_index);
+				rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+				rozkazDoKolejki_condition(6, regisX_index, regisX_index);	
+				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++			
+									
+			}
+		}
+		
+		else{
+			
+				addToReg("A<B", "-1", 0);
+				condition_reg = regisX_index;
+                		rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+
+		}	
+		
+    	}
+    
+	// num < ide
+	else if ( num_ide == 81 ) { 
+        	
+		cout << "lt_function PRZED (2) -> temp_flag = " << temp_flag << endl;
+		if (b >= 0){
+			if (a < b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "lt_function PO (2) -> temp_flag = " << temp_flag << endl;		
+		
+		//TODO DONE?
+
+		if (a >= b && b >= 0){
+			addToReg("A<B", "-1", 0);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+		}
+		else{	
+			if (b < 0)
+				addToReg("A<B", "-1", -81);
+			else
+				addToReg("A<B", "-1", b - a);
+			condition_reg = regisX_index;       
+			rozkazDoKolejki_condition(4, condition_reg, findIndex_value(b));
+
+			if (a < 8 && b >= 0){ 
+				for(int i=0; i < a; i++) {
+	                		rozkazDoKolejki_condition(9, condition_reg, -1);
+				}
+            		}
+			else{
+				addToReg("A<B(A)", "-1", a);
+				genNum_condition(a, regisX_index);
+				rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+				rozkazDoKolejki_condition(6, regisX_index, regisX_index);
+				rozkazDoKolejki_condition(-2, regisX_index, 0);	
+			}
+	        }
+    	}
+
+	// ide < num
+	else if ( num_ide == 10 ) { 
+        	
+		cout << "lt_function PRZED (3) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0){
+			if (a < b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "lt_function PO (3) -> temp_flag = " << temp_flag << endl;
+
+		if (a > b && a >= 0){
+			addToReg("A<B", "-1", a);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+		}
+		else{
+			addToReg("A<B", "-1", -120);
+			genNum_condition(b, regisX_index);		
+
+			if (a >= 0)					
+				addToReg("A<B", "-1", b - a);		
+			else
+				addToReg("A<B", "-1", -10);
+
+			if (a < 8){ 
+				for(int i=0; i < a; i++) {
+                			rozkazDoKolejki_condition(9, condition_reg, -1);
+				}
+            		}
+
+			else{
+				addToReg("A<B(A)", "-1", 0);			
+				rozkazDoKolejki_condition(4, regisX_index, findIndex_value(a));
+				rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+				rozkazDoKolejki_condition(6, regisX_index, regisX_index);
+				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++	
+			}
+	        }		
+		
+    	}
+
+	// ide < ide
+	else if ( num_ide == 11 ) { 
+        	
+		cout << "lt_function PRZED (4) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0 && b >= 0){
+			if (a < b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "lt_function PO (4) -> temp_flag = " << temp_flag << endl;
+
+		if (a >= b && b >= 0) {
+			addToReg("A<B", "-1", 0);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+        	}
+
+	        else {
+			addToReg("A<B", "-1", 0);
+			condition_reg = regisX_index;
+			regisY_index = findIndex_value(b);
+			rozkazDoKolejki_condition(4, condition_reg, regisY_index);
+			regisX_index = findIndex_value(a);
+			rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+			if (a >= 0 && b >= 0)			
+				addToReg("A<B", "-1", b - a);
+			else
+				addToReg("A<B", "-1", -11);
+        	}		
+		
+    	}
+}
+
+void ge_function(long long int a, long long int b) { //TODO
+
+	cout << "WEJŚCIE DO ge_function: a = " << a << ", b = " << b << endl;		
+	
+	// num > num
+	if ( num_ide == 80 ) { 
+        	
+		cout << "ge_function PRZED (1) -> temp_flag = " << temp_flag << endl;
+		if (a >= b)
+			temp_flag = 1;
+		else
+			temp_flag = 0;
+		cout << "ge_function PO (1) -> temp_flag = " << temp_flag << endl;		
+		
+		if (a >= b){
+			
+			if (b < 8){
+				addToReg("A>=B", "-1", a+1);
+				condition_reg = regisX_index;
+				genNum_condition(a+1, condition_reg); 
+				for(int i=0; i < b; i++) {
+                			rozkazDoKolejki_condition(9, condition_reg, -1);
+				}
+            		}
+
+			else{
+				addToReg("A>=B(A)", "-1", a+1);
+				condition_reg = regisX_index;
+				genNum_condition(a+1, condition_reg);
+				addToReg("A>=B(B)", "-1", b);
+				genNum_condition(b, regisX_index);
+				rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+				rozkazDoKolejki_condition(6, regisX_index, regisX_index);	
+				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++			
+									
+			}
+		}
+		
+		else{
+			
+				addToReg("A>=B", "-1", 0);
+				condition_reg = regisX_index;
+                		rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+
+		}	
+		
+    	}
+    
+	// num >= ide
+	else if ( num_ide == 81 ) { 
+        	
+		cout << "ge_function PRZED (2) -> temp_flag = " << temp_flag << endl;
+		if (b >= 0){
+			if (a >= b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "ge_function PO (2) -> temp_flag = " << temp_flag << endl;		
+		
+		if (a < b && b >= 0){
+			addToReg("A>=B", "-1", 0);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+		}
+		else{	
+			addToReg("A>=B", "-1", a+1);
+			condition_reg = regisX_index;       
+			genNum_condition(a+1, condition_reg);
+			if (b < 8 && b >= 0){ 
+				for(int i=0; i < b; i++) {
+	                		rozkazDoKolejki_condition(9, condition_reg, -1);
+				}
+            		}
+			else{
+				regisY_index = findIndex_value(b);
+				rozkazDoKolejki_condition(6, condition_reg, regisY_index);	
+			}
+	        }
+    	}
+
+	// ide >= num
+	else if ( num_ide == 10 ) { 
+        	
+		cout << "ge_function PRZED (3) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0){
+			if (a > b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "ge_function PO (3) -> temp_flag = " << temp_flag << endl;
+
+		if (a < b && a >= 0){
+			addToReg("A>=B", "-1", a+1);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+		}
+		else{
+			addToReg("A>=B", "-1", -120);
+			condition_reg = regisX_index;
+			regisY_index = findIndex_value(a);		
+			rozkazDoKolejki_condition(4, condition_reg, regisY_index);
+			rozkazDoKolejki_condition(8, condition_reg, -1);
+			addToReg("A>B", "-1", a + 1);		
+
+			if (b < 8){ 
+				for(int i=0; i < b; i++) {
+                			rozkazDoKolejki_condition(9, condition_reg, -1);
+				}
+				addToReg("A>=B", "-1", a + 1 - b);
+            		}
+			else{
+				addToReg("A>=B(B)", "-1", b);
+				genNum_condition(b, regisX_index);			
+				rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++
+				addToReg("A>=B", "-1", a + 1 - b);	
+			}
+	        }		
+		
+    	}
+
+	// ide >= ide
+	else if ( num_ide == 11 ) { 
+        	
+		cout << "ge_function PRZED (4) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0 && b >= 0){
+			if (a >= b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "ge_function PO (4) -> temp_flag = " << temp_flag << endl;
+
+		if (a <= b && a >= 0) {
+			addToReg("A>=B", "-1", 0);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+        	}
+
+	        else {
+			addToReg("A>=B", "-1", a + 1);
+			condition_reg = regisX_index;
+			regisY_index = findIndex_value(a);
+			rozkazDoKolejki_condition(4, condition_reg, regisY_index);
+			rozkazDoKolejki_condition(8, condition_reg, -1);
+			regisX_index = findIndex_value(b);
+			rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+        	}		
+		
+    	}
+}
+
+void le_function(long long int a, long long int b) { //TODO
+
+	cout << "WEJŚCIE DO le_function: a = " << a << ", b = " << b << endl;		
+	
+	// num <= num
+	if ( num_ide == 80 ) { 
+        	
+		cout << "le_function PRZED (1) -> temp_flag = " << temp_flag << endl;
+		if (a <= b)
+			temp_flag = 1;
+		else
+			temp_flag = 0;
+		cout << "le_function PO (1) -> temp_flag = " << temp_flag << endl;		
+		
+		if (b >= a){
+			
+			if (a < 8){
+				addToReg("A<=B", "-1", b+1);
+				condition_reg = regisX_index;
+				genNum_condition(b+1, condition_reg); 
+				for(int i=0; i < a; i++) {
+                			rozkazDoKolejki_condition(9, condition_reg, -1);
+				}
+            		}
+
+			else{
+				addToReg("A<=B(A)", "-1", b+1);
+				condition_reg = regisX_index;
+				genNum_condition(b+1, condition_reg);
+				addToReg("A<=B(B)", "-1", a);
+				genNum_condition(a, regisX_index);
+				rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+				rozkazDoKolejki_condition(6, regisX_index, regisX_index);	
+				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++			
+									
+			}
+		}
+		
+		else{
+			
+				addToReg("A<=B", "-1", 0);
+				condition_reg = regisX_index;
+                		rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+
+		}	
+		
+    	}
+    
+	// num <= ide
+	else if ( num_ide == 81 ) { 
+        	
+		cout << "le_function PRZED (2) -> temp_flag = " << temp_flag << endl;
+		if (b >= 0){
+			if (a <= b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "lt_function PO (2) -> temp_flag = " << temp_flag << endl;		
+		
+		//TODO DONE?
+
+		if (a > b && b >= 0){
+			addToReg("A<=B", "-1", 0);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+		}
+		else{	
+			if (b < 0)
+				addToReg("A<=B", "-1", -81);
+			else
+				addToReg("A<=B", "-1", b - a + 1);
+			condition_reg = regisX_index;       
+			rozkazDoKolejki_condition(4, condition_reg, findIndex_value(b));
+			rozkazDoKolejki_condition(8, condition_reg, -1);
+
+			if (a < 8 && b >= 0){ 
+				for(int i=0; i < a; i++) {
+	                		rozkazDoKolejki_condition(9, condition_reg, -1);
+				}
+            		}
+			else{
+				addToReg("A<=B(A)", "-1", a);
+				genNum_condition(a, regisX_index);
+				rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+				rozkazDoKolejki_condition(6, regisX_index, regisX_index);
+				rozkazDoKolejki_condition(-2, regisX_index, 0);	
+			}
+	        }
+    	}
+
+	// ide <= num
+	else if ( num_ide == 10 ) { 
+        	
+		cout << "le_function PRZED (3) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0){
+			if (a <= b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "le_function PO (3) -> temp_flag = " << temp_flag << endl;
+
+		if (a > b && a >= 0){
+			addToReg("A<=B", "-1", a);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+		}
+		else{
+			addToReg("A<=B", "-1", -120);
+			genNum_condition(b + 1, regisX_index);		
+
+			if (a >= 0)					
+				addToReg("A<B", "-1", b - a + 1);		
+			else
+				addToReg("A<B", "-1", -10);
+
+			if (a < 8){ 
+				for(int i=0; i < a; i++) {
+                			rozkazDoKolejki_condition(9, condition_reg, -1);
+				}
+            		}
+
+			else{
+				addToReg("A<=B(A)", "-1", 0);			
+				rozkazDoKolejki_condition(4, regisX_index, findIndex_value(a));
+				rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+				rozkazDoKolejki_condition(6, regisX_index, regisX_index);
+				rozkazDoKolejki_condition(-2, regisX_index, 0); // usuwam rejestr B w C++	
+			}
+	        }		
+		
+    	}
+
+	// ide <= ide
+	else if ( num_ide == 11 ) { 
+        	
+		cout << "le_function PRZED (4) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0 && b >= 0){
+			if (a <= b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "le_function PO (4) -> temp_flag = " << temp_flag << endl;
+
+		if (a > b && b >= 0) {
+			addToReg("A<=B", "-1", 0);
+			condition_reg = regisX_index;
+			rozkazDoKolejki_condition(6, condition_reg, condition_reg);
+        	}
+
+	        else {
+			addToReg("A<=B", "-1", 0);
+			condition_reg = regisX_index;
+			regisY_index = findIndex_value(b);
+			rozkazDoKolejki_condition(4, condition_reg, regisY_index);
+			rozkazDoKolejki_condition(8, condition_reg, -1);
+			regisX_index = findIndex_value(a);
+			rozkazDoKolejki_condition(6, condition_reg, regisX_index);
+			addToReg("A<=B", "-1", b - a + 1);
         	}		
 		
     	}
@@ -3257,7 +3843,13 @@ void wykonajRozkazy_condition(){
 
 int main(int argv, char* argc[]){
 	assignFlag = true;
+	
+	fout.open("dane.txt", ios::out);
+
 	yyparse();
+
+	// fout.close();
+	
 	return 0;
 }
 
