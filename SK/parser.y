@@ -125,7 +125,10 @@ int regisY_index = 0;
 int num_ide = -1; // 0 -> num, 1 -> identifier
 int dzialanie_przemienne = -1; // 0 -> / - ; 1 -> * +
 int krok = 0;
+int krok_pre = 0;
 int jump = 0;
+int jumps[10] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+int jump_index = 0;
 fstream fout;
 
 %}
@@ -142,7 +145,7 @@ fstream fout;
 %token <str> DECLARE IN END
 %token <str> SEM LB CLN RB
 %token <str> ASG IF THEN ELSE ENDIF WHILE ENDWHILE
-%token <str> FOR FROM TO DO ENDFOR DOWNTO WRITE READ
+%token <str> FOR FROM TO DO ENDDO ENDFOR DOWNTO WRITE READ
 %token <str> ADD SUB MUL DIV MOD
 %token <str> EQUAL NOT_EQUAL LT GT LE GE
 %token <str> num pidentifier 
@@ -154,6 +157,7 @@ fstream fout;
 %%
 program:
 	DECLARE declarations IN commands END {
+		wykonajRozkazy();
 		pushCommand("HALT", -1, -1);
 		fout.close();
 	}
@@ -203,7 +207,7 @@ commands:
 
 command:
 	identifier ASG { assignFlag = false; } expression SEM {
-		cout << ">>wejście w command<<" << endl;
+		cout << ">>wejście w command: identifier ASG { assignFlag = false; } expression SEM<<" << endl;
 		if(assignTarget.type == "ARRAY") {
             		Identifier index = identifierStack.at(tabAssignTargetIndex);
 			cout << "Cech" << endl;
@@ -223,8 +227,11 @@ command:
         	}
         
 		else if(assignTarget.local == 0){
-				cout << "sprawdzam num_ide" << endl;
+
+				cout << "sprawdzam: num_ide = " << num_ide << endl;
+
 				if (num_ide == 0 || num_ide == 10){
+					
 					if (num_ide == 10){
 
 						cout << "Wartość do rejestru (identifier : num)" << endl;
@@ -249,16 +256,19 @@ command:
 						cout << "command: identifier PO (2) -> temp_ll = " << temp_ll << endl;
 						wykonajRozkazy_expression();
 					}
+
 					else{
 						if (regisX_index != regisY_index)
 							pushCommand("COPY", regisX_index, regisY_index);
 						wykonajRozkazy_expression();
 						regisY_index=0;
 					}
+
 					if (temp_reg != -1){
 						removeFromReg_index(temp_reg, "-1", 0);
 						temp_reg = -1;				
-					}	
+					}
+	
 					regisX_index=0;
 				}
 
@@ -367,6 +377,7 @@ command:
 					regisX_index = 0;
 				}
 	
+				//temp_ll = -1; TODO
 				num_ide = -1; cout << "num_ide = -1;" << endl;
 				cout << "Drogba " << endl;
 				
@@ -376,7 +387,7 @@ command:
             		yyerror("Próba modyfikacji iteratora pętli.");
 	      	}
         	
-		wykonajRozkazy();
+		//wykonajRozkazy();
 		identifierStack.at(assignTarget.name).initialized = 1;
 		assignFlag = true;
 	}
@@ -393,20 +404,29 @@ command:
 			
 	} commands if_body  
 
-|	WHILE { 
-		assignFlag = false; 
-		depth++; 
-			
-	} condition { assignFlag = true; } DO commands ENDWHILE {
+|	while_body condition { assignFlag = true;
+		jumps[0] = krok_pre; // JUMP krok
+		cout << "jump1 = " << jumps[0] << endl; //test 
+		rozkazDoKolejki_condition(11, condition_reg, 1);
+		wykonajRozkazy_condition();
+		 
+	} DO 
+	// {rozkazDoKolejki_condition(11, condition_reg, -4);}
+	commands ENDWHILE {
         
-
-        	
+		wykonajRozkazy_condition();
+		jumps[1] = krok_pre + 1;
+		cout << "jump2 = " << krok << endl; //test
+		rozkazDoKolejki_condition(10, -4, jumps[0] + 900); // trochę głupia sprawa, ale jest +900, bo później jest jeszcze + 100 i wchodzi w ifa ">=1000"
+		wykonajRozkazy_condition();
+		wykonajRozkazy();
+        	cout << "  >> Dojdę tu?" << endl;  
         	depth--;
         	assignFlag = true;
 
 	}
 
-|	DO commands WHILE condition END DO {
+|	DO commands while_body condition ENDDO {
 	
 	}
 
@@ -468,6 +488,10 @@ command:
 		pushCommand("PUT", regisX_index, -1);
 		assignFlag = true;
 	}
+;
+
+while_body:
+	WHILE { assignFlag = false; depth++; }
 ;
 
 if_body:
@@ -1023,6 +1047,7 @@ condition:
 
 
 			add_function(a, b);
+			num_ide = -1; cout << "num_ide = -1;" << endl;
 		}
         
 		else {
@@ -1113,6 +1138,7 @@ condition:
 
 
 			gt_function(a, b);
+			num_ide = -1; cout << "num_ide = -1;" << endl;
 		}
         
 		else {
@@ -1173,6 +1199,7 @@ condition:
 
 
 			lt_function(a, b);
+			num_ide = -1; cout << "num_ide = -1;" << endl;
 		}
         
 		else {
@@ -1233,6 +1260,7 @@ condition:
 
 
 			le_function(a, b);
+			num_ide = -1; cout << "num_ide = -1;" << endl;
 		}
         
 		else {
@@ -1293,6 +1321,7 @@ condition:
 
 
 			ge_function(a, b);
+			num_ide = -1; cout << "num_ide = -1;" << endl;
 		}
         
 		else {
@@ -1474,22 +1503,48 @@ identifier:
 void pushCommand(string str, int r1, int r2){
 	if (r2 == -1){
 		if (r1 == -1){
-			fout << krok << ": " << str << endl;
-			cout << krok++ << ": " << str << endl;
+			cout << krok << ": " << str << endl;
+			fout << krok++ << ": " << str << endl;
 			//codeStack.push_back(str);
 		}
 		
+		//WHILE
+		else if (r1 > 1000){
+			cout << "pushCommand (r1 > 1000) -> " << str << " " << r1 << " " << r2 << endl;
+			cout << "pushCommand (r1 > 1000) -> krok = " << krok << endl;
+			cout << krok << ": " << str << " " << r1 - 1000 << endl;
+			fout << krok++ << ": " << str << " " << r1 - 1000 << endl;		
+		}
+
+		//IF
+		else if (r1 > 100){
+			cout << "pushCommand (r1 > 100) -> " << str << " " << r1 << " " << r2 << endl;
+			cout << "pushCommand (r1 > 100) -> krok = " << krok << ", działanie: " << krok - r1 + 100 << endl;
+			cout << krok << ": " << str << " " << krok - r1 + 100 << endl;
+			fout << krok++ << ": " << str << " " << krok - 1 - r1 + 100 << endl;		
+		}
+		
 		else{
+			cout << "pushCommand -> " << str << " " << r1 << " " << r2 << endl;
 			char r = 'A'+r1;
-			fout << krok << ": " << str << " " << r << endl;
-			cout << krok++ << ": " << str << " " << r << endl;
+			cout << krok << ": " << str << " " << r << endl;
+			fout << krok++ << ": " << str << " " << r << endl;
 			//codeStack.push_back(str);
 		}
 	}
+	//WHILE JZERO
+	else if (r2 > 1000){
+		char r = 'A'+r1;
+			cout << "pushCommand (r2 > 1000) -> " << str << " " << r << " " << r2 << endl;
+			cout << krok << ": " << str << " " << r << " " << r2 - 1000 << endl;
+			fout << krok++ << ": " << str << " " << r << " " << r2 - 1000 << endl;
+			//codeStack.push_back(str);
+	}
+	//IF JZERO
 	else if (r2 > 100){
 		char r = 'A'+r1;
-			fout << krok << ": " << str << " " << r << " " << krok + r2 - 100 << endl;
-			cout << krok++ << ": " << str << " " << r << " " << krok + r2 - 100 << endl;
+			cout << krok << ": " << str << " " << r << " " << krok + r2 - 100 << endl;
+			fout << krok++ << ": " << str << " " << r << " " << krok + r2 - 100 << endl;
 			cout << "krok = " << krok << endl;
 			cout << "r2 = " << r2 << endl;
 			//codeStack.push_back(str);
@@ -1497,8 +1552,8 @@ void pushCommand(string str, int r1, int r2){
 	else{
 		char a = 'A'+r1;
 		char b = 'A'+r2;
-		fout << krok << ": " << str << " " << a << " " << b << endl;
-		cout << krok++ << ": " << str << " " << a << " " << b << endl;
+		cout << krok << ": " << str << " " << a << " " << b << endl;
+		fout << krok++ << ": " << str << " " << a << " " << b << endl;
 		//codeStack.push_back(str);	
 	}
 }
@@ -2358,39 +2413,43 @@ void div_function(long long int a, long long int b) { //TODO
 	else if ( num_ide == 10 ) { 
         	
 		cout << "div_function PRZED (3) -> temp_ll = " << temp_ll << endl;
+
 		if (b == 0)
-		temp_ll = 0;
-		else		
-		temp_ll = a / b;
+			temp_ll = 0;
+		else if (a >= 0)		
+			temp_ll = a / b;
+		else
+			temp_ll = -10;
+
 		cout << "div_function PO (3) -> temp_ll = " << temp_ll << endl;		
 		
 		if (a < b && a >= 0){
 			rozkazDoKolejki_expression(6, -2, -2);
 		}
 		else if (b == 2){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 1){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 		}
 
 		else if (b == 4){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 8){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 16){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
@@ -2398,7 +2457,7 @@ void div_function(long long int a, long long int b) { //TODO
 		}
 
 		else if (b == 32){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
@@ -2444,29 +2503,29 @@ void div_function(long long int a, long long int b) { //TODO
 			rozkazDoKolejki_expression(6, -2, -2);
 		}				
 		else if (b == 2){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 1){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 		}
 
 		else if (b == 4){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 8){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 		}
 
 		else if (b == 16){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
@@ -2474,7 +2533,7 @@ void div_function(long long int a, long long int b) { //TODO
 		}
 
 		else if (b == 32){
-			rozkazDoKolejki_expression(4, -1, findIndex_value(a));
+			rozkazDoKolejki_expression(4, -2, findIndex_value(a));
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
 			rozkazDoKolejki_expression(7, -2, -1);
@@ -3700,6 +3759,7 @@ void rozkazDoKolejki_condition(int nr_rozkazu, int rX, int rY){
 }
 
 void rozkazDoKolejki(int nr_rozkazu, int rX, int rY){
+	if (nr_rozkazu == 11) cout << "MIKIS UWAGA!!!" << endl;
 	rozkazy[rozkazy_index][0] = nr_rozkazu;
 	rozkazy[rozkazy_index][1] = rX;
 	rozkazy[rozkazy_index][2] = rY;
@@ -3708,50 +3768,63 @@ void rozkazDoKolejki(int nr_rozkazu, int rX, int rY){
 
 void wykonajRozkazy(){
 	for (int i=0; i<rozkazy_index; i++){
+
+		cout << " ! ! TEST ! ! -> i: " << i << ", : " << rozkazy[i][0] << " " << rozkazy[i][1] << " " << rozkazy[i][2] << endl; 
+
 		if (rozkazy[i][0]==-1)
 			break;
-		else if (rozkazy[i][0]==0){
+		switch(rozkazy[i][0])
+		{
+		case 0:
 			pushCommand("GET", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==1){
+			break;
+		case 1:
 			pushCommand("PUT", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==2){
+			break;
+		case 2:
 			pushCommand("LOAD", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==3){
+			break;
+		case 3:
 			pushCommand("STORE", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==4){
+			break;
+		case 4:
 			pushCommand("COPY", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==5){
+			break;
+		case 5:
 			pushCommand("ADD", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==6){
+			break;
+		case 6:
 			pushCommand("SUB", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==7){
+			break;
+		case 7:
 			pushCommand("HALF", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==8){
+			break;
+		case 8:
 			pushCommand("INC", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==9){
+			break;
+		case 9:
 			pushCommand("DEC", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==10){
-			pushCommand("JUMP", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==11){
+			break;
+		case 10:
+			pushCommand("JUMP", rozkazy[i][1], -1);
+			cout << "wykonajRozkazy() -> " << "JUMP " << rozkazy[i][1] << " -1" << endl; 
+			break;
+		case 11:
+			cout << "wykonajrozkazy funkcja rozkazy ["<<i<<"][2] = " << rozkazy[i][2] << endl;
+			rozkazy[i][2] = jumps[rozkazy[i][2]] + 1000;
 			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==12){
+			cout << "wykonajRozkazy() -> JZERO " << rozkazy[i][1] << " " << rozkazy[i][2] << endl;
+			break;
+		case 12:
 			pushCommand("JODD", rozkazy[i][1], rozkazy[i][2]);
-		}
-		else if (rozkazy[i][0]==-2){
+			break;
+		case 111:
+			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
+			break;
+		case -2:
 			cout << "W tym miejscu USUWAM rejestr B z dzielenia, index = " << regisX_index << endl; // test
 			removeFromReg_index(rozkazy[i][1], "-1", 0); //usuwam w C++ rejestr B
+			break;
 		}
 	}
 
@@ -3788,6 +3861,7 @@ void wykonajRozkazy_expression(){
 			rozkazDoKolejki(rozkazy_expression[i][0], rozkazy_expression[i][1], rozkazy_expression[i][2]);
 			
 		}
+		krok_pre++;
 	}
 
 	cout << "Wyjście z pętli" << endl;
@@ -3805,27 +3879,35 @@ void wykonajRozkazy_condition(){
 
 	for (int i=0; i<rozkazy_index_condition; i++){
 	
-		if (rozkazy_condition[i][0]==-1)
-			break;
+		if (rozkazy_condition[i][0] == -1)
+			break;		
+
 		else{
 		
 			if (rozkazy_condition[i][1] == -2)
 				rozkazy_condition[i][1] = regisX_index;
 			else if (rozkazy_condition[i][1] == -3)
 				rozkazy_condition[i][1] = regisY_index;
-
+			else if (rozkazy_condition[i][1] == -4){
+				cout << "wykonajRozkazy_condition() -> jump = " << rozkazy_condition[i][2] << endl;
+				rozkazy_condition[i][1] = rozkazy_condition[i][2] + 100;
+				cout << "Minusjedynkuję rozkazy_condition[i][2], a rozkazy_condition[i][1] = " << rozkazy_condition[i][1] << endl;
+				rozkazy_condition[i][2] = -1;
+			}			
+	
 			if (rozkazy_condition[i][2] == -2)
 				rozkazy_condition[i][2] = regisX_index;
 			else if (rozkazy_condition[i][2] == -3)
 				rozkazy_condition[i][2] = regisY_index;
 			else if (rozkazy_condition[i][2] == -4){
 				cout << "(i) = " << i << endl;
-				rozkazy_condition[i][2] = rozkazy_index_condition - i + 100; 								
-				jump = i;
+				rozkazy_condition[i][2] = rozkazy_index_condition - i + 100;
+				rozkazy_condition[i][0] = 111; 								
 			}
 			rozkazDoKolejki(rozkazy_condition[i][0], rozkazy_condition[i][1], rozkazy_condition[i][2]);
 			
 		}
+		krok_pre++;
 	}
 
 	cout << "Wyjście z pętli" << endl;
@@ -3837,7 +3919,6 @@ void wykonajRozkazy_condition(){
 	}
 
 	cout << "Końcowe rozkazy_index_condition = " << rozkazy_index_condition << endl;
-	jump = rozkazy_index_condition - jump;
 	rozkazy_index_condition=0;
 }
 
