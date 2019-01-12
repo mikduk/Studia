@@ -4,6 +4,7 @@
 #include <string.h>
 #include <cstdlib>
 #include <stdlib.h>
+#include <stack>
 #include <vector>
 #include <map>
 //#include <coś>
@@ -28,6 +29,10 @@ typedef struct {
 vector<string> codeStack;
 vector<Jump> jumpStack;
 vector<Identifier> forStack;
+stack <int> while_jump;
+stack <int> while_jzero;
+stack <int> if_jzero;
+stack <int> if_jodd;
 map<string, Identifier> identifierStack;
 //
 int yylex();
@@ -126,9 +131,8 @@ int num_ide = -1; // 0 -> num, 1 -> identifier
 int dzialanie_przemienne = -1; // 0 -> / - ; 1 -> * +
 int krok = 0;
 int krok_pre = 0;
-int jump = 0;
-int jumps[10] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-int jump_index = 0;
+//int jump = 0;
+
 fstream fout;
 
 %}
@@ -394,20 +398,18 @@ command:
 
 |	IF { assignFlag = false; depth++; } condition { assignFlag = true; } THEN {
 		cout << "Jestem w IF condition THEN { " << endl; //test
+		
+		rozkazDoKolejki_condition(11, condition_reg, -4); //pushCommand("JZERO", temp_reg, krok + x);
 		cout << "wykonuje: wykonajRozkazy_condition();" << endl; 			
 		wykonajRozkazy_condition();
-		rozkazDoKolejki_condition(11, condition_reg, -4); //pushCommand("JZERO", temp_reg, krok + x);
-		cout << "wykonuje: wykonajRozkazy();" << endl;
-		wykonajRozkazy();
-		
 		
 			
 	} commands if_body  
 
 |	while_body condition { assignFlag = true;
-		jumps[0] = krok_pre; // JUMP krok
-		cout << "jump1 = " << jumps[0] << endl; //test 
-		rozkazDoKolejki_condition(11, condition_reg, 1);
+		while_jump.push(krok_pre); // JUMP krok
+		cout << "jump1 = " << while_jump.top() << endl; //test
+		rozkazDoKolejki_condition(11, condition_reg, -1);
 		wykonajRozkazy_condition();
 		 
 	} DO 
@@ -415,12 +417,13 @@ command:
 	commands ENDWHILE {
         
 		wykonajRozkazy_condition();
-		jumps[1] = krok_pre + 1;
-		cout << "jump2 = " << krok << endl; //test
-		rozkazDoKolejki_condition(10, -4, jumps[0] + 900); // trochę głupia sprawa, ale jest +900, bo później jest jeszcze + 100 i wchodzi w ifa ">=1000"
+		cout << "while_jzero.push" << endl;
+		while_jzero.push(krok_pre + 1);
+		cout << "jump2 = " << krok_pre+1 << endl; //test
+		rozkazDoKolejki_condition(10, -4, while_jump.top() + 900); // trochę głupia sprawa, ale jest +900, bo później jest jeszcze + 100 i wchodzi w ifa ">=1000"
+		while_jump.pop();
 		wykonajRozkazy_condition();
-		wykonajRozkazy();
-        	cout << "  >> Dojdę tu?" << endl;  
+		//wykonajRozkazy(); 
         	depth--;
         	assignFlag = true;
 
@@ -485,7 +488,7 @@ command:
 	}
 
 |	WRITE { assignFlag = false; } value SEM {
-		pushCommand("PUT", regisX_index, -1);
+		rozkazDoKolejki_condition(1, regisX_index, -1); // pushCommand("PUT", regisX_index, -1);
 		assignFlag = true;
 	}
 ;
@@ -499,18 +502,23 @@ if_body:
         
 		cout << "Jestem w ELSE, WOW!" << endl;
         	wykonajRozkazy_condition();
-		wykonajRozkazy();
-		cout << "Wykonałem rozkazy w ELSE" << endl;
+		cout << "Wykonałem rozkazy w ELSE i if_jzero.push(krok_pre)" << endl;
+		cout << "krok_pre = " << krok_pre << endl;
+		if_jzero.push(krok_pre);
 		rozkazDoKolejki_condition(12, condition_reg, -4); //JODD X 
 		rozkazDoKolejki_condition(9, condition_reg, -1); // DEC X
 		rozkazDoKolejki_condition(12, condition_reg, -4); // JODD X
+		wykonajRozkazy_condition();
 	        assignFlag = true;
 
 	} commands ENDIF {
 
 	        cout << "commands ENDIF - dzięki Bogu <3" << endl;
+		cout << "Wykonałem rozkazy w commands ENDIF i if_jodd.push(krok_pre)x2" << endl;
 		wykonajRozkazy_condition();
-		wykonajRozkazy();
+		cout << "krok_pre = " << krok_pre << endl;
+		if_jodd.push(krok_pre);
+		if_jodd.push(krok_pre);
 
 	        depth--;
         	assignFlag = true;
@@ -520,7 +528,10 @@ if_body:
         
 		cout << "ENDIF - całe szczęście :)" << endl;
 		wykonajRozkazy_condition();
-		wykonajRozkazy();		
+		cout << "Wykonałem rozkazy w ENDIF i if_jzero.push(krok_pre)x2" << endl;
+		cout << "krok_pre = " << krok_pre << endl;
+		if_jzero.push(krok_pre);
+		if_jzero.push(krok_pre);		
 
 	        depth--;
 	        assignFlag = true;
@@ -1533,20 +1544,33 @@ void pushCommand(string str, int r1, int r2){
 		}
 	}
 	//WHILE JZERO
-	else if (r2 > 1000){
+	else if (r2 == 1000){
 		char r = 'A'+r1;
 			cout << "pushCommand (r2 > 1000) -> " << str << " " << r << " " << r2 << endl;
-			cout << krok << ": " << str << " " << r << " " << r2 - 1000 << endl;
-			fout << krok++ << ": " << str << " " << r << " " << r2 - 1000 << endl;
+			cout << krok << ": " << str << " " << r << " " << while_jzero.top() << endl;
+			fout << krok++ << ": " << str << " " << r << " " << while_jzero.top() << endl;
+			cout << "while_jzero.pop();" << endl;			
+			while_jzero.pop();
 			//codeStack.push_back(str);
 	}
-	//IF JZERO
-	else if (r2 > 100){
+	//IF JODD
+	else if (r2 == 200){
 		char r = 'A'+r1;
-			cout << krok << ": " << str << " " << r << " " << krok + r2 - 100 << endl;
-			fout << krok++ << ": " << str << " " << r << " " << krok + r2 - 100 << endl;
-			cout << "krok = " << krok << endl;
-			cout << "r2 = " << r2 << endl;
+			cout << "pushCommand (r2 > 200) -> " << str << " " << r << " " << r2 << endl;
+			cout << krok << ": " << str << " " << r << " " << if_jodd.top() << endl;
+			fout << krok++ << ": " << str << " " << r << " " << if_jodd.top() << endl;
+			cout << "if_jodd.pop();" << endl;
+			if_jodd.pop();
+			//codeStack.push_back(str);
+	}	
+	//IF JZERO
+	else if (r2 == 100){
+		char r = 'A'+r1;
+			cout << "pushCommand (r2 > 100) -> " << str << " " << r << " " << r2 << endl;
+			cout << krok << ": " << str << " " << r << " " << if_jzero.top() << endl;
+			fout << krok++ << ": " << str << " " << r << " " << if_jzero.top() << endl;
+			cout << "if_jzero.pop();" << endl;
+			if_jzero.pop();
 			//codeStack.push_back(str);
 	}	
 	else{
@@ -3811,15 +3835,25 @@ void wykonajRozkazy(){
 			break;
 		case 11:
 			cout << "wykonajrozkazy funkcja rozkazy ["<<i<<"][2] = " << rozkazy[i][2] << endl;
-			rozkazy[i][2] = jumps[rozkazy[i][2]] + 1000;
+			cout << "wykonajrozkazy funkcja rozkazy ["<<i<<"][1] = " << rozkazy[i][1] << endl;
+			cout << "while_jzero.empty() = " << while_jzero.empty() << endl;			
+			cout << "while_jzero.top() = " << while_jzero.top() << endl;
+			rozkazy[i][2] = 1000;
+
 			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
 			cout << "wykonajRozkazy() -> JZERO " << rozkazy[i][1] << " " << rozkazy[i][2] << endl;
 			break;
 		case 12:
 			pushCommand("JODD", rozkazy[i][1], rozkazy[i][2]);
 			break;
-		case 111:
+		case 111: //IF JZERO 
+			rozkazy[i][2] = 100;
 			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
+			break;
+		case 112: //IF JODD
+			cout << "Czy to tu??? case112" << endl; 
+			rozkazy[i][2] = 200;
+			pushCommand("JODD", rozkazy[i][1], rozkazy[i][2]);
 			break;
 		case -2:
 			cout << "W tym miejscu USUWAM rejestr B z dzielenia, index = " << regisX_index << endl; // test
@@ -3901,8 +3935,10 @@ void wykonajRozkazy_condition(){
 				rozkazy_condition[i][2] = regisY_index;
 			else if (rozkazy_condition[i][2] == -4){
 				cout << "(i) = " << i << endl;
-				rozkazy_condition[i][2] = rozkazy_index_condition - i + 100;
-				rozkazy_condition[i][0] = 111; 								
+				if (rozkazy_condition[i][0] == 11)				
+					rozkazy_condition[i][0] = 111; // IF JZERO
+				else
+					rozkazy_condition[i][0] = 112; // IF JODD 								
 			}
 			rozkazDoKolejki(rozkazy_condition[i][0], rozkazy_condition[i][1], rozkazy_condition[i][2]);
 			
