@@ -134,7 +134,7 @@ int krok_pre = 0;
 //int jump = 0;
 
 fstream fout;
-
+extern FILE *yyin;
 %}
 
 //%define
@@ -471,12 +471,12 @@ command:
         	}
         
 		else if(assignTarget.local == 0) {
-			cout << "Jestem niestety w READ - wartość do rejestru" << endl;
-			addToReg($2, "-1", -100); //TODO wartość wczytana
-			cout << "Przeszła pętla" << endl;
+			
+			addToReg($2, "-1", -100); 
             		rozkazDoKolejki_condition(0, regisX_index, -1); //pushCommand("GET", regisX_index, -1); 
-            		pokazRejestr();
-			regisX_index=0;
+			wykonajRozkazy_condition();            		
+			pokazRejestr();
+			
         	}
         	
 		else {
@@ -489,6 +489,7 @@ command:
 
 |	WRITE { assignFlag = false; } value SEM {
 		rozkazDoKolejki_condition(1, regisX_index, -1); // pushCommand("PUT", regisX_index, -1);
+		wykonajRozkazy_condition(); 
 		assignFlag = true;
 	}
 ;
@@ -1531,8 +1532,8 @@ void pushCommand(string str, int r1, int r2){
 		else if (r1 > 100){
 			cout << "pushCommand (r1 > 100) -> " << str << " " << r1 << " " << r2 << endl;
 			cout << "pushCommand (r1 > 100) -> krok = " << krok << ", działanie: " << krok - r1 + 100 << endl;
-			cout << krok << ": " << str << " " << krok - r1 + 100 << endl;
-			fout << krok++ << ": " << str << " " << krok - 1 - r1 + 100 << endl;		
+			cout << krok << ": " << str << " " << r1 - 100 << endl;
+			fout << krok++ << ": " << str << " " << r1 - 100 << endl;		
 		}
 		
 		else{
@@ -1572,6 +1573,11 @@ void pushCommand(string str, int r1, int r2){
 			cout << "if_jzero.pop();" << endl;
 			if_jzero.pop();
 			//codeStack.push_back(str);
+	}
+	else if (str.compare("JZERO")){
+		char r = 'A'+r1;
+		cout << krok << ": " << str << " " << r << " " << r2 << endl;
+		fout << krok++ << ": " << str << " " << r << " " << r2 << endl;	
 	}	
 	else{
 		char a = 'A'+r1;
@@ -2424,8 +2430,10 @@ void div_function(long long int a, long long int b) { //TODO
 			rozkazDoKolejki_expression(4, tr, regisY_index);
 			if (b >= 0)  
 				knownDivision(a, b);
-			else
-				//unknownDivision(a, b);
+			else{
+				wykonajRozkazy_expression();
+				unknownDivision(a, b);
+			}
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
 			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
 			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++			
@@ -2504,8 +2512,10 @@ void div_function(long long int a, long long int b) { //TODO
 			rozkazDoKolejki_expression(4, regisX_index, regisY_index);
 			if (a >= 0)  
 				knownDivision(a, b);
-			else
-				//unknownDivision(a, b);
+			else{
+				wykonajRozkazy_expression();
+				unknownDivision(a, b);
+			}
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
 			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
 			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++			
@@ -2582,8 +2592,10 @@ void div_function(long long int a, long long int b) { //TODO
 			rozkazDoKolejki_expression(4, temp_reg, orginal_b);
 			if (a >= 0 && b >= 0)  
 				knownDivision(a, b);
-			else
-				//unknownDivision(a, b);
+			else{
+				wykonajRozkazy_expression();
+				unknownDivision(a, b);
+			}
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
 			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
 			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++
@@ -3517,47 +3529,62 @@ void knownMultiplication(long long int a, long long int b) {
 void unknownDivision(long long a, long long b){ //TODO
 	
 	// X := A / B, X == D
+	int n = krok_pre;
 	int regC_index;
 	addToReg("div(C)", "-1", 1);
 	regC_index = regisX_index;
 	
-	long long c = 1; // SUB C C, INC C
-	rozkazDoKolejki_expression(6, regC_index, regC_index); // SUB C C
-	rozkazDoKolejki_expression(8, regC_index, -1); // INC C
+	// long long c = 1; // SUB C C, INC C
+	rozkazDoKolejki_expression(6, regC_index, regC_index); // n: SUB C C
+	rozkazDoKolejki_expression(8, regC_index, -1); // n+1: INC C
 
 	
-	long long d = 0; // SUB D D
-	rozkazDoKolejki_expression(6, -2, -2); // SUB D D
+	// long long d = 0; // SUB D D
+	rozkazDoKolejki_expression(6, -2, -2); // n+2: SUB D D
 
 	
-	regisY_index = findIndex_value(a); // A
-	regisX_index = findIndex_value(b); // B	
+	int regA_index = findIndex_value(a); // A
+	int regB_index = findIndex_value(b); // B	
 	
 
-	while(a > b){ // JZERO E n+3, ale dla jakiegoś E = A - B
-		b = b + b;	// ADD B B
-		rozkazDoKolejki_expression(5, regisX_index, regisX_index); // ADD B B
-		c = c + c;	// ADD C C
-		rozkazDoKolejki_expression(5, regC_index, regC_index); // ADD C C
-	}
+	//while(a > b){ // JZERO E n+3, ale dla jakiegoś E = A - B
+		addToReg("div(X)", "-1", 0);
+		int regX_index = regisX_index;
+		rozkazDoKolejki_expression(4, regX_index, regA_index); // n+3: COPY X A
+		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+4: SUB X B
+		rozkazDoKolejki_expression(11, regX_index, n + 9); // n+5: JZERO X (n+5)+4
+		// b = b + b;	// ADD B B
+		rozkazDoKolejki_expression(5, regisX_index, regisX_index); // n+6: ADD B B
+		// c = c + c;	// ADD C C
+		rozkazDoKolejki_expression(5, regC_index, regC_index); // n+7: ADD C C
+		rozkazDoKolejki_expression(10, n + 3 + 100, -1); // n+8: JUMP (n+8)-5 
+	//}
 
 
-	do {
-		if (a >= b) {
-			a = a - b; // SUB A B
-			rozkazDoKolejki_expression(6, regisY_index, regisX_index); // SUB A B
-			d = d + c; // ADD D C
-			rozkazDoKolejki_expression(5, -2, regC_index); // ADD D C
-		}
+	//do {
+		rozkazDoKolejki_expression(4, regX_index, regA_index); // n+9: COPY X A
+		rozkazDoKolejki_expression(8, regX_index, -1); // n+10: INC X
+		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+11: DEC X B
+		rozkazDoKolejki_expression(11, regX_index, n + 15); // n+12: JZERO X (n+12)+3
+		//if (a >= b) {
+			
+			// a = a - b; // SUB A B
+			rozkazDoKolejki_expression(6, regA_index, regB_index); // n+11: SUB A B
+			// d = d + c; // ADD D C
+			rozkazDoKolejki_expression(5, -2, regC_index); // n+12: ADD D C
+		//}
 	
-	b = b / 2; // HALF B
-	rozkazDoKolejki_expression(7, regisX_index, -1); // HALF B
-	c = c / 2; // HALF C
-	rozkazDoKolejki_expression(7, regC_index, -1); // HALF B
+	// b = b / 2; // HALF B
+	rozkazDoKolejki_expression(7, regB_index, -1); // n+13: HALF B
+	// c = c / 2; // HALF C
+	rozkazDoKolejki_expression(7, regC_index, -1); // n+14: HALF C
 	
-	} while (c != 0);
-		
-	rozkazDoKolejki_expression(-2, regC_index, 0); // usuwam rejestr C w C++, ponieważ c==0	
+	//} while (c != 0);
+	rozkazDoKolejki_expression(11, regC_index, n + 17); // n+15: JZERO C (n+15)+2
+	rozkazDoKolejki_expression(10, n + 9 + 100, -1); // n+16: JUMP n+9
+	rozkazDoKolejki_expression(6, regX_index, regX_index); // n+17: SUB X X	 
+	rozkazDoKolejki_expression(-2, regC_index, 0); // usuwam rejestr C w C++, ponieważ c==0		
+	rozkazDoKolejki_expression(-2, regX_index, 0); // usuwam rejestr X w C++, ponieważ x==0	
 	//return d; //dzielenie
 	// return a; //modulo
 
@@ -3613,36 +3640,68 @@ void knownDivision(long long a, long long b){
 
 }
 
-void unknownModulo(long long a, long long b){
+void unknownModulo(long long a, long long b){ //TODO
 	
-	// X := A % B, X == A
-
-	long long c = 1;
-	long long d = 0;
-
-	if (b == 0){
-		//return 0;
-	}
-
-	while(a > b){
-		b = b + b;
-		c = c + c;
-	}
-
-
-	do {
-		if (a >= b) {
-			a = a - b;
-			d = d + c;
-		}
+	// X := A / B, X == D
+	int n = krok_pre;
+	int regC_index;
+	addToReg("div(C)", "-1", 1);
+	regC_index = regisX_index;
 	
-	b = b / 2;
-	c = c / 2;
+	// long long c = 1; // SUB C C, INC C
+	rozkazDoKolejki_expression(6, regC_index, regC_index); // n: SUB C C
+	rozkazDoKolejki_expression(8, regC_index, -1); // n+1: INC C
+
 	
-	} while (c != 0);
-		
-		
-	//return a; //modulo
+	// long long d = 0; // SUB D D
+	rozkazDoKolejki_expression(6, -2, -2); // n+2: SUB D D
+
+	
+	int regA_index = findIndex_value(a); // A
+	int regB_index = findIndex_value(b); // B	
+	
+
+	//while(a > b){ // JZERO E n+3, ale dla jakiegoś E = A - B
+		addToReg("div(X)", "-1", 0);
+		int regX_index = regisX_index;
+		rozkazDoKolejki_expression(4, regX_index, regA_index); // n+3: COPY X A
+		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+4: SUB X B
+		rozkazDoKolejki_expression(11, regX_index, n + 9); // n+5: JZERO X (n+5)+4
+		// b = b + b;	// ADD B B
+		rozkazDoKolejki_expression(5, regisX_index, regisX_index); // n+6: ADD B B
+		// c = c + c;	// ADD C C
+		rozkazDoKolejki_expression(5, regC_index, regC_index); // n+7: ADD C C
+		rozkazDoKolejki_expression(10, n + 3 + 100, -1); // n+8: JUMP (n+8)-5 
+	//}
+
+
+	//do {
+		rozkazDoKolejki_expression(4, regX_index, regA_index); // n+9: COPY X A
+		rozkazDoKolejki_expression(8, regX_index, -1); // n+10: INC X
+		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+11: DEC X B
+		rozkazDoKolejki_expression(11, regX_index, n + 15); // n+12: JZERO X (n+12)+3
+		//if (a >= b) {
+			
+			// a = a - b; // SUB A B
+			rozkazDoKolejki_expression(6, regA_index, regB_index); // n+11: SUB A B
+			// d = d + c; // ADD D C
+			rozkazDoKolejki_expression(5, -2, regC_index); // n+12: ADD D C
+		//}
+	
+	// b = b / 2; // HALF B
+	rozkazDoKolejki_expression(7, regB_index, -1); // n+13: HALF B
+	// c = c / 2; // HALF C
+	rozkazDoKolejki_expression(7, regC_index, -1); // n+14: HALF C
+	
+	//} while (c != 0);
+	rozkazDoKolejki_expression(11, regC_index, n + 17); // n+15: JZERO C (n+15)+2
+	rozkazDoKolejki_expression(10, n + 9 + 100, -1); // n+16: JUMP n+9
+	rozkazDoKolejki_expression(4, -2, regA_index); // n+17: COPY D A
+	rozkazDoKolejki_expression(6, regX_index, regX_index); // n+18: SUB X X	 
+	rozkazDoKolejki_expression(-2, regC_index, 0); // usuwam rejestr C w C++, ponieważ c==0		
+	rozkazDoKolejki_expression(-2, regX_index, 0); // usuwam rejestr X w C++, ponieważ x==0	
+	//return d; //dzielenie
+	// return a; //modulo
 
 }
 
@@ -3783,7 +3842,6 @@ void rozkazDoKolejki_condition(int nr_rozkazu, int rX, int rY){
 }
 
 void rozkazDoKolejki(int nr_rozkazu, int rX, int rY){
-	if (nr_rozkazu == 11) cout << "MIKIS UWAGA!!!" << endl;
 	rozkazy[rozkazy_index][0] = nr_rozkazu;
 	rozkazy[rozkazy_index][1] = rX;
 	rozkazy[rozkazy_index][2] = rY;
@@ -3961,7 +4019,15 @@ void wykonajRozkazy_condition(){
 int main(int argv, char* argc[]){
 	assignFlag = true;
 	
-	fout.open("dane.txt", ios::out);
+	if(argv == 3){
+		fout.open(argc[2], ios::out);
+		if (argc[1]!="/dev/stdin"){
+			yyin = fopen(argc[1], "r");
+		}
+	}
+	else{
+		fout.open("dane.txt", ios::out);
+	}
 
 	yyparse();
 
