@@ -41,6 +41,9 @@ stack <int> dowhile_jump;
 stack <int> dowhile_jzero;
 stack <int> if_jzero;
 stack <int> if_jodd;
+stack <int> for_iterator;
+stack <int> for_jump;
+stack <int> for_jzero;
 queue <int> exp_jzero;
 queue <int> not_equal;
 vector <Akumulator> akumulator;
@@ -467,16 +470,42 @@ command:
 					string err = $2;
 					yyerror("Kolejna deklaracja zmiennej "+err+".");
         			}
+
         			else {
             				Identifier s;
             				createIdentifier(&s, $2, 1, 0, 0, "IDENTIFIER");
             				insertIdentifier($2, s);
         			}
+				string id = $2;
+				addToReg("ITERATOR("+id+")", "-1", -20);
+				for_iterator.push(regisX_index);
+				
+
 				assignFlag = false;
 			        assignTarget = identifierStack.at($2);
 			        depth++;
     			
-			} FROM value for_body 
+	} FROM value {
+				if (num_ide == 1){
+					
+					cout << "    FROM: $4 = " << $5 << endl; 
+					int regA = findIndex($5);
+					rozkazDoKolejki_condition(4, for_iterator.top(), regA); // COPY IT A			
+					wykonajRozkazy_condition();
+					for_jump.push(krok_pre);
+					temp_ll = -1;
+					num_ide = -1;
+				}
+
+				else if (num_ide == 0){
+					cout << "    FROM: temp_ll = " << temp_ll << endl; 
+					genNum_condition(for_iterator.top(), temp_ll);			
+					wykonajRozkazy_condition();
+					for_jump.push(krok_pre);
+					temp_ll = -1;
+					num_ide = -1;
+				}
+	} for_body 
 
 
 |	READ identifier { assignFlag = true; } SEM {			
@@ -577,80 +606,38 @@ if_body:
 
 for_body:
 	TO value DO {
-
-        	Identifier a = identifierStack.at(expressionArguments[0]);
-        	Identifier b = identifierStack.at(expressionArguments[1]);
-
-		if(a.type == "NUMBER"){
-            
-        	}
-
-		else if(a.type == "IDENTIFIER") {
-            
-        	}
-        
-		else {
-			Identifier index = identifierStack.at(argumentsTabIndex[0]);
-            
-			if(index.type == "NUMBER") {
-              
-			}
-            
-			else{
-		               pushCommand("ADD mejbi", -1, -1);
-		               pushCommand("STORE mejbi", -1, -1);
-		               pushCommand("LOADI mejbi", -1, -1);
-            		}
+		
+		cout << "TO value: $2 = " << $2 << endl;
+		
+		if (num_ide == 1){
+			int regB = findIndex($2);
+			addToReg("TO", "-1", -20);
+			temp_reg = regisX_index;	
+			rozkazDoKolejki_condition(4, temp_reg, regB);		
 		}
 
-		identifierStack.at(assignTarget.name).initialized = 1;
-
-        	if(a.type != "ARRAY" && b.type != "ARRAY"){
-            		//sub(b, a, 1, 1);
+		else if (num_ide == 0){
+			addToReg("TO", "-1", -20);
+			temp_reg = regisX_index;
+			genNum_condition(temp_reg, temp_ll);
 		}
 
-        	else {
-            		Identifier aI, bI;
-            
-			if(identifierStack.count(argumentsTabIndex[0]) > 0)
-		                aI = identifierStack.at(argumentsTabIndex[0]);
-
-			if(identifierStack.count(argumentsTabIndex[1]) > 0)
-				bI = identifierStack.at(argumentsTabIndex[1]);
-            
-			//subTab(b, a, bI, aI, 1, 1);
-            
-			argumentsTabIndex[0] = "-1";
-			argumentsTabIndex[1] = "-1";
-        	}
-
-		expressionArguments[0] = "-1";
-		expressionArguments[1] = "-1";
-
-		Identifier s;
-		string name = "C" + to_string(depth);
-        	createIdentifier(&s, name, 1, 0, 0, "IDENTIFIER");
-        	insertIdentifier(name, s);
-
-        	forStack.push_back(identifierStack.at(assignTarget.name));
-
-		pushCommand("JZERO", codeStack.size()+2, -1);
-        
-        	Jump j;
-        	createJump(&j, codeStack.size(), depth);
-        	jumpStack.push_back(j);
-        	pushCommand("JZERO", -1, -1);
-        	pushCommand("DEC", -1, -1);
+		temp_ll = -1;
+		num_ide = -1;		
+		rozkazDoKolejki_condition(8, temp_reg, -1);
+		rozkazDoKolejki_condition(6, temp_reg, for_iterator.top());	
+		rozkazDoKolejki_condition(11, temp_reg, -8);			
 
 		assignFlag = true;
 
 	} commands ENDFOR {
 	
-	        Identifier iterator = forStack.at(forStack.size()-1);
-	        //rejestr
-	     
-        	//removeIdentifier(name);
-        	removeIdentifier(iterator.name);
+		rozkazDoKolejki_condition(8, for_iterator.top(), -1);
+		rozkazDoKolejki_condition(10, for_jump.top() + 100, -1);
+		for_jump.pop();
+		wykonajRozkazy_condition();
+		for_jzero.push(krok_pre);
+	        for_iterator.pop();
         	
         	depth--;
         	assignFlag = true;
@@ -1914,12 +1901,30 @@ void pushCommand(string str, int r1, int r2){
 	//DOWHILE JODD
 	else if (r2 == 114){
 		char r = 'A'+r1;
-			cout << "pushCommand (r2 > 122) -> " << str << " " << r << " " << r2 << endl;
+			cout << "pushCommand (r2 > 114) -> " << str << " " << r << " " << r2 << endl;
 			cout << krok << ": " << str << " " << r << " " << dowhile_jzero.top() << endl;
 			fout << krok++ << ": " << str << " " << r << " " << dowhile_jzero.top() << endl;
 			cout << "dowhile_jzero.pop();" << endl;
 			dowhile_jzero.pop();
-	}				
+	}
+	//FOR TO JZERO
+	else if (r2 == 115){
+		char r = 'A'+r1;
+			cout << "pushCommand (r2 > 115) -> " << str << " " << r << " " << r2 << endl;
+			cout << krok << ": " << str << " " << r << " " << for_jzero.top() << endl;
+			fout << krok++ << ": " << str << " " << r << " " << for_jzero.top() << endl;
+			cout << "for_jzero.pop();" << endl;
+			for_jzero.pop();
+	}
+	//FOR DOWN TO
+	else if (r2 == 116){
+		char r = 'A'+r1;
+			cout << "pushCommand (r2 > 116) -> " << str << " " << r << " " << r2 << endl;
+			cout << krok << ": " << str << " " << r << " " << for_jzero.top() << endl;
+			fout << krok++ << ": " << str << " " << r << " " << for_jzero.top() << endl;
+			cout << "for_jzero.pop();" << endl;
+			for_jzero.pop();
+	}											
 	//NOT_EQUAL JODD	
 	else if (r2 == -5){
 		char r = 'A'+r1;
@@ -4672,6 +4677,14 @@ void wykonajRozkazy(){
 			rozkazy[i][2] = 114;
 			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
 			break;
+		case 115: //FOR TO JZERO
+			rozkazy[i][2] = 115;
+			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
+			break;
+		case 116: //FOR DOWNTO JZERO
+			rozkazy[i][2] = 116;
+			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
+			break;
 		case 121: //EXP JZERO 
 			rozkazy[i][2] = 121;
 			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
@@ -4783,6 +4796,10 @@ void wykonajRozkazy_condition(){
 					rozkazy_condition[i][0] = 113; // WHILE JZERO
 			else if (rozkazy_condition[i][2] == -7)				
 					rozkazy_condition[i][0] = 114; // DOWHILE JZERO
+			else if (rozkazy_condition[i][2] == -8)				
+					rozkazy_condition[i][0] = 115; // FOR TO JZERO
+			else if (rozkazy_condition[i][2] == -9)				
+					rozkazy_condition[i][0] = 116; // FOR DOWNTO JZERO
 			rozkazDoKolejki(rozkazy_condition[i][0], rozkazy_condition[i][1], rozkazy_condition[i][2]);
 			
 		}
