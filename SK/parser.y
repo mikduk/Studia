@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <stdlib.h>
 #include <stack>
+#include <queue>
 #include <vector>
 #include <map>
 //#include <coś>
@@ -33,6 +34,7 @@ stack <int> while_jump;
 stack <int> while_jzero;
 stack <int> if_jzero;
 stack <int> if_jodd;
+queue <int> exp_jzero;
 map<string, Identifier> identifierStack;
 //
 int yylex();
@@ -240,7 +242,9 @@ command:
 
 						cout << "Wartość do rejestru (identifier : num)" << endl;
 						
-						regisY_index = findIndex(temp_str); 								
+						regisY_index = findIndex(temp_str);
+
+						cout << "    NEW TEST[1]: regisX_index = " << regisX_index << endl;							
 					}
 
 					else{
@@ -248,11 +252,14 @@ command:
 					}
 
 					cout << "command: identifier PRZED (1) -> temp_ll = " << temp_ll << endl;
+					cout << "    NEW TEST[1.5]: regisX_index = " << regisX_index << "$2 = " << $2 << endl;
 					addToReg($2, "-1", temp_ll);
 					cout << "command: identifier PO (1) -> temp_ll = " << temp_ll << endl;
+					cout << "    NEW TEST[2]: regisX_index = " << regisX_index << endl;
 
 					cout << "Przeszła pętla" << endl;
             				pokazRejestr();
+					cout << "    NEW TEST[3]: regisX_index = " << regisX_index << endl;
 
 					if (num_ide == 0){
 						cout << "command: identifier PRZED (2) -> temp_ll = " << temp_ll << endl;
@@ -262,8 +269,10 @@ command:
 					}
 
 					else{
+						cout << "    NEW TEST[4]: regisX_index = " << regisX_index << endl;
 						if (regisX_index != regisY_index)
 							pushCommand("COPY", regisX_index, regisY_index);
+						cout << "    NEW TEST[5]: regisX_index = " << regisX_index << endl;
 						wykonajRozkazy_expression();
 						regisY_index=0;
 					}
@@ -471,8 +480,9 @@ command:
         	}
         
 		else if(assignTarget.local == 0) {
-			
-			addToReg($2, "-1", -100); 
+			cout << "    NEW TEST[0.5]: regisX_index = " << regisX_index << endl;
+			addToReg($2, "-1", -100);
+			cout << "    NEW TEST[0.7]: regisX_index = " << regisX_index << endl; 
             		rozkazDoKolejki_condition(0, regisX_index, -1); //pushCommand("GET", regisX_index, -1); 
 			wykonajRozkazy_condition();            		
 			pokazRejestr();
@@ -1574,10 +1584,14 @@ void pushCommand(string str, int r1, int r2){
 			if_jzero.pop();
 			//codeStack.push_back(str);
 	}
-	else if (str.compare("JZERO")){
+	//EXP JZERO
+	else if (r2 == 121){
 		char r = 'A'+r1;
-		cout << krok << ": " << str << " " << r << " " << r2 << endl;
-		fout << krok++ << ": " << str << " " << r << " " << r2 << endl;	
+			cout << "pushCommand (r2 > 100) -> " << str << " " << r << " " << r2 << endl;
+			cout << krok << ": " << str << " " << r << " " << exp_jzero.front() << endl;
+			fout << krok++ << ": " << str << " " << r << " " << exp_jzero.front() << endl;
+			cout << "exp_jzero.pop();" << endl;
+			exp_jzero.pop();
 	}	
 	else{
 		char a = 'A'+r1;
@@ -2131,8 +2145,10 @@ void mul_function(long long int a, long long int b) { //TODO zrobić dla wartoś
 			rozkazDoKolejki_expression(4, regisX_index, regisY_index);
 			if (b >= 0)  
 				knownMultiplication(a, b);
-			else
+			else{
+				wykonajRozkazy_expression();
 				unknownMultiplication(a, b);
+			}
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A, B wyzeruje się sam
 			rozkazDoKolejki_expression(-2, tr, 0); // usunwam rejestr B w C++
 			
@@ -2203,8 +2219,10 @@ void mul_function(long long int a, long long int b) { //TODO zrobić dla wartoś
 			rozkazDoKolejki_expression(4, regisX_index, regisY_index);
 			if (a >= 0)  
 				knownMultiplication(a, b);
-			else
+			else{
+				wykonajRozkazy_expression();
 				unknownMultiplication(a, b);
+			}
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A, B wyzeruje się sam
 			rozkazDoKolejki_expression(-2, tr, 0);		
 		}
@@ -2276,8 +2294,10 @@ void mul_function(long long int a, long long int b) { //TODO zrobić dla wartoś
 			rozkazDoKolejki_expression(4, temp_reg, orginal_b);
 			if (a >= 0 && b >= 0)  
 				knownMultiplication(a, b);
-			else
+			else{
+				wykonajRozkazy_expression();
 				unknownMultiplication(a, b);
+			}
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg);
 			rozkazDoKolejki_expression(-2, tr, 0);	
 		}
@@ -2516,9 +2536,9 @@ void div_function(long long int a, long long int b) { //TODO
 				wykonajRozkazy_expression();
 				unknownDivision(a, b);
 			}
-			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
-			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
-			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++			
+			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr B
+			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr A
+			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr A w C++			
 		}
 		
     	}
@@ -3483,11 +3503,13 @@ void le_function(long long int a, long long int b) { //TODO
 
 void unknownMultiplication(long long int a, long long int b) {
 	//long long int wynik = 0;
+	int n = krok + 1;
 	rozkazDoKolejki_expression(6, -2, -2); // SUB C C
 	regisX_index = findIndex_value(b);
 	regisY_index = findIndex_value(a);
 	
-	rozkazDoKolejki_expression(11, regisX_index, -1); // TODO obliczyć trzeci argument JZERO B j
+	exp_jzero.push(n + 9);
+	rozkazDoKolejki_expression(11, regisX_index, 121); // JZERO B (n+1)+8
       
 	//while (b > 0) {
 	rozkazDoKolejki_expression(8, regisX_index, -1); // INC B
@@ -3502,7 +3524,7 @@ void unknownMultiplication(long long int a, long long int b) {
 	rozkazDoKolejki_expression(7, regisX_index, -1); // ADD A A
         //b >>= 1;
       //}
-	rozkazDoKolejki_expression(10, -1, -1); // TODO JUMP j+7
+	rozkazDoKolejki_expression(10, n + 1 + 100, -1); // JUMP n+1
 	//return wynik;
     }
 
@@ -3529,7 +3551,8 @@ void knownMultiplication(long long int a, long long int b) {
 void unknownDivision(long long a, long long b){ //TODO
 	
 	// X := A / B, X == D
-	int n = krok_pre;
+	int n = krok_pre + 1;
+	cout << "unknownDivision n = " << n << endl;
 	int regC_index;
 	addToReg("div(C)", "-1", 1);
 	regC_index = regisX_index;
@@ -3552,9 +3575,10 @@ void unknownDivision(long long a, long long b){ //TODO
 		int regX_index = regisX_index;
 		rozkazDoKolejki_expression(4, regX_index, regA_index); // n+3: COPY X A
 		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+4: SUB X B
-		rozkazDoKolejki_expression(11, regX_index, n + 9); // n+5: JZERO X (n+5)+4
+		exp_jzero.push(n + 9);
+		rozkazDoKolejki_expression(11, regX_index, 121); // n+5: JZERO X (n+5)+4
 		// b = b + b;	// ADD B B
-		rozkazDoKolejki_expression(5, regisX_index, regisX_index); // n+6: ADD B B
+		rozkazDoKolejki_expression(5, regB_index, regB_index); // n+6: ADD B B
 		// c = c + c;	// ADD C C
 		rozkazDoKolejki_expression(5, regC_index, regC_index); // n+7: ADD C C
 		rozkazDoKolejki_expression(10, n + 3 + 100, -1); // n+8: JUMP (n+8)-5 
@@ -3564,25 +3588,27 @@ void unknownDivision(long long a, long long b){ //TODO
 	//do {
 		rozkazDoKolejki_expression(4, regX_index, regA_index); // n+9: COPY X A
 		rozkazDoKolejki_expression(8, regX_index, -1); // n+10: INC X
-		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+11: DEC X B
-		rozkazDoKolejki_expression(11, regX_index, n + 15); // n+12: JZERO X (n+12)+3
+		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+11: SUB X B
+		exp_jzero.push(n + 15);		
+		rozkazDoKolejki_expression(11, regX_index, 121); // n+12: JZERO X (n+12)+3
 		//if (a >= b) {
 			
 			// a = a - b; // SUB A B
-			rozkazDoKolejki_expression(6, regA_index, regB_index); // n+11: SUB A B
+			rozkazDoKolejki_expression(6, regA_index, regB_index); // n+13: SUB A B
 			// d = d + c; // ADD D C
-			rozkazDoKolejki_expression(5, -2, regC_index); // n+12: ADD D C
+			rozkazDoKolejki_expression(5, -2, regC_index); // n+14: ADD D C
 		//}
 	
 	// b = b / 2; // HALF B
-	rozkazDoKolejki_expression(7, regB_index, -1); // n+13: HALF B
+	rozkazDoKolejki_expression(7, regB_index, -1); // n+15: HALF B
 	// c = c / 2; // HALF C
-	rozkazDoKolejki_expression(7, regC_index, -1); // n+14: HALF C
+	rozkazDoKolejki_expression(7, regC_index, -1); // n+16: HALF C
 	
 	//} while (c != 0);
-	rozkazDoKolejki_expression(11, regC_index, n + 17); // n+15: JZERO C (n+15)+2
-	rozkazDoKolejki_expression(10, n + 9 + 100, -1); // n+16: JUMP n+9
-	rozkazDoKolejki_expression(6, regX_index, regX_index); // n+17: SUB X X	 
+	exp_jzero.push(n + 19);
+	rozkazDoKolejki_expression(11, regC_index, 121); // n+17: JZERO C (n+15)+2
+	rozkazDoKolejki_expression(10, n + 9 + 100, -1); // n+18: JUMP n+9
+	rozkazDoKolejki_expression(6, regX_index, regX_index); // n+19: SUB X X	 
 	rozkazDoKolejki_expression(-2, regC_index, 0); // usuwam rejestr C w C++, ponieważ c==0		
 	rozkazDoKolejki_expression(-2, regX_index, 0); // usuwam rejestr X w C++, ponieważ x==0	
 	//return d; //dzielenie
@@ -3643,7 +3669,7 @@ void knownDivision(long long a, long long b){
 void unknownModulo(long long a, long long b){ //TODO
 	
 	// X := A / B, X == D
-	int n = krok_pre;
+	int n = krok_pre + 1;
 	int regC_index;
 	addToReg("div(C)", "-1", 1);
 	regC_index = regisX_index;
@@ -3668,7 +3694,7 @@ void unknownModulo(long long a, long long b){ //TODO
 		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+4: SUB X B
 		rozkazDoKolejki_expression(11, regX_index, n + 9); // n+5: JZERO X (n+5)+4
 		// b = b + b;	// ADD B B
-		rozkazDoKolejki_expression(5, regisX_index, regisX_index); // n+6: ADD B B
+		rozkazDoKolejki_expression(5, regA_index, regA_index); // n+6: ADD B B
 		// c = c + c;	// ADD C C
 		rozkazDoKolejki_expression(5, regC_index, regC_index); // n+7: ADD C C
 		rozkazDoKolejki_expression(10, n + 3 + 100, -1); // n+8: JUMP (n+8)-5 
@@ -3678,7 +3704,7 @@ void unknownModulo(long long a, long long b){ //TODO
 	//do {
 		rozkazDoKolejki_expression(4, regX_index, regA_index); // n+9: COPY X A
 		rozkazDoKolejki_expression(8, regX_index, -1); // n+10: INC X
-		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+11: DEC X B
+		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+11: SUB X B
 		rozkazDoKolejki_expression(11, regX_index, n + 15); // n+12: JZERO X (n+12)+3
 		//if (a >= b) {
 			
@@ -3721,8 +3747,7 @@ void knownModulo(long long a, long long b){
 
 	
 	regisY_index = findIndex_value(a); // A
-	regisX_index = findIndex_value(b); // B
-	cout << "DUPA regisX_index: " << regisX_index << endl;	
+	regisX_index = findIndex_value(b); // B	
 	
 
 	while(a > b){ 
@@ -3909,9 +3934,12 @@ void wykonajRozkazy(){
 			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
 			break;
 		case 112: //IF JODD
-			cout << "Czy to tu??? case112" << endl; 
 			rozkazy[i][2] = 200;
 			pushCommand("JODD", rozkazy[i][1], rozkazy[i][2]);
+			break;
+		case 121: //EXP JZERO 
+			rozkazy[i][2] = 121;
+			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
 			break;
 		case -2:
 			cout << "W tym miejscu USUWAM rejestr B z dzielenia, index = " << regisX_index << endl; // test
@@ -3949,6 +3977,8 @@ void wykonajRozkazy_expression(){
 				rozkazy_expression[i][2] = regisX_index;
 			else if (rozkazy_expression[i][2] == -3)
 				rozkazy_expression[i][2] = regisY_index;
+			else if (rozkazy_expression[i][2] == 121)
+				rozkazy_expression[i][0] = 121;
 			
 			rozkazDoKolejki(rozkazy_expression[i][0], rozkazy_expression[i][1], rozkazy_expression[i][2]);
 			
