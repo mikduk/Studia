@@ -861,6 +861,7 @@ expression:
 			if (num_ide == 80){
 				a = atoll($1);
 				b = atoll($3);
+				mul_function(a, b);
 			}
 
 			else if (num_ide == 11){				
@@ -870,22 +871,126 @@ expression:
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
 				cout << "vMv n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+				mul_function(a, b);
 			}
 
 			else if (num_ide == 81){
 				a = atoll($1);
 				int b_ind = findIndex($3);
 				b = regis_value[b_ind];
+				switch(b)
+				{
+				case 0:
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;				
+				case 1:
+					rozkazDoKolejki_expression(4, -2, b_ind);
+					break;
+				case 2:
+					rozkazDoKolejki_expression(4, -2, b_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				case 4:
+					rozkazDoKolejki_expression(4, -2, b_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				case 8:
+					rozkazDoKolejki_expression(4, -2, b_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				case 16:
+					rozkazDoKolejki_expression(4, -2, b_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				case 32:
+					rozkazDoKolejki_expression(4, -2, b_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				case 64:
+					rozkazDoKolejki_expression(4, -2, b_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				default:
+					mul_function(a, b);
+					break;
+				}
 			}
 
 			else if (num_ide == 10){
 				int a_ind = findIndex($1);
 				a = regis_value[a_ind];
 				b = atoll($3);
+				switch(a)
+				{
+				case 0:
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;				
+				case 1:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					break;
+				case 2:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				case 4:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				case 8:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				case 16:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				case 32:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				case 64:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;
+				default:
+					mul_function(a, b);
+					break;
+				}
+				
 			}  
 
 
-			mul_function(a, b);
+			
 		}
         
 		else {
@@ -919,6 +1024,7 @@ expression:
 			if (num_ide == 80){
 				a = atoll($1);
 				b = atoll($3);
+				div_function(a, b);
 			}
 
 			else if (num_ide == 11){				
@@ -928,22 +1034,85 @@ expression:
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
 				cout << "vDv n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+				if (a_ind == b_ind){
+					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(8, -2, -1);
+					temp_ll = 1;
+				}
+				else
+					div_function(a, b);
 			}
 
 			else if (num_ide == 81){
 				a = atoll($1);
 				int b_ind = findIndex($3);
 				b = regis_value[b_ind];
+				if (a == 0){
+					rozkazDoKolejki_expression(6, -2, -2);
+				}
+				else
+					mod_function(a, b);
 			}
 
 			else if (num_ide == 10){
 				int a_ind = findIndex($1);
 				a = regis_value[a_ind];
 				b = atoll($3);
+				switch(b)
+				{
+				case 0:
+					rozkazDoKolejki_expression(6, -2, -2);
+					break;				
+				case 1:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					break;
+				case 2:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(7, -2, -1);
+					break;
+				case 4:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					break;
+				case 8:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					break;
+				case 16:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					break;
+				case 32:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					break;
+				case 64:
+					rozkazDoKolejki_expression(4, -2, a_ind);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					rozkazDoKolejki_expression(7, -2, -1);
+					break;
+				default:
+					div_function(a, b);
+					break;
+				}
 			}  
 
 
-			div_function(a, b);
+			
 		}
         
 		else {
@@ -977,6 +1146,11 @@ expression:
 			if (num_ide == 80){
 				a = atoll($1);
 				b = atoll($3);
+				if (b == 0 || b == 1){
+					rozkazDoKolejki_expression(6, -2, -2);
+				}
+				else
+					mod_function(a, b);
 			}
 
 			else if (num_ide == 11){				
@@ -986,22 +1160,38 @@ expression:
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
 				cout << "v%v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+				if (a_ind == b_ind){
+					rozkazDoKolejki_expression(6, -2, -2);
+					temp_ll = 0;
+				}
+				else
+					mod_function(a, b);
 			}
 
 			else if (num_ide == 81){
 				a = atoll($1);
 				int b_ind = findIndex($3);
 				b = regis_value[b_ind];
+				if (a == 0){
+					rozkazDoKolejki_expression(6, -2, -2);
+				}
+				else
+					mod_function(a, b);
 			}
 
 			else if (num_ide == 10){
 				int a_ind = findIndex($1);
 				a = regis_value[a_ind];
 				b = atoll($3);
+				if (b == 0 || b == 1){
+					rozkazDoKolejki_expression(6, -2, -2);
+				}
+				else
+					mod_function(a, b);
 			}  
 
 
-			mod_function(a, b);
+			
 		}
         
 		else {
@@ -2592,7 +2782,7 @@ void div_function(long long int a, long long int b) { //TODO
 		else if (a == 0 || b == 0){
 			rozkazDoKolejki_expression(6, -2, -2);
 		}	
-			
+	
 		else{
 			int orginal_a, orginal_b, tr;			
 			orginal_b = findIndex_value(b);				
