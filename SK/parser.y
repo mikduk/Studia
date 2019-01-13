@@ -348,13 +348,7 @@ command:
 					
  					cout << "Przeszła pętla" << endl;
             				pokazRejestr();
-					if (dzialanie_przemienne == 1){
-						if (regisX_index != regisY_index)
-	                				pushCommand("COPY", regisX_index, regisY_index);
-					}
-					else{
-						//TODO			
-					}
+					
 					cout << "regisX_index = " << regisX_index << ", regisY_index = " << regisY_index << endl;
 					wykonajRozkazy_expression();
 					
@@ -2714,8 +2708,10 @@ void mod_function(long long int a, long long int b) { //TODO
 			rozkazDoKolejki_expression(4, tr, regisY_index);
 			if (b >= 0)  
 				knownModulo(a, b);
-			else
-				//unknownModulo(a, b);
+			else{
+				wykonajRozkazy_expression();
+				unknownModulo(a, b);
+			}
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
 			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
 			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++			
@@ -2762,8 +2758,10 @@ void mod_function(long long int a, long long int b) { //TODO
 			rozkazDoKolejki_expression(4, regisX_index, regisY_index);
 			if (a >= 0)  
 				knownModulo(a, b);
-			else
-				//unknownModulo(a, b);
+			else{
+				wykonajRozkazy_expression();
+				unknownModulo(a, b);
+			}
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
 			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
 			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++			
@@ -2812,8 +2810,10 @@ void mod_function(long long int a, long long int b) { //TODO
 			rozkazDoKolejki_expression(4, temp_reg, orginal_b);
 			if (a >= 0 && b >= 0)  
 				knownModulo(a, b);
-			else
-				//unknownModulo(a, b);
+			else{
+				wykonajRozkazy_expression();
+				unknownModulo(a, b);
+			}
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
 			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
 			rozkazDoKolejki_expression(-2, tr, 0); // usuwam rejestr B w C++		
@@ -3548,7 +3548,7 @@ void knownMultiplication(long long int a, long long int b) {
       }
     }
 
-void unknownDivision(long long a, long long b){ //TODO
+void unknownDivision(long long a, long long b){
 	
 	// X := A / B, X == D
 	int n = krok_pre + 1;
@@ -3692,7 +3692,8 @@ void unknownModulo(long long a, long long b){ //TODO
 		int regX_index = regisX_index;
 		rozkazDoKolejki_expression(4, regX_index, regA_index); // n+3: COPY X A
 		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+4: SUB X B
-		rozkazDoKolejki_expression(11, regX_index, n + 9); // n+5: JZERO X (n+5)+4
+		exp_jzero.push(n + 9);
+		rozkazDoKolejki_expression(11, regX_index, 121); // n+5: JZERO X (n+5)+4
 		// b = b + b;	// ADD B B
 		rozkazDoKolejki_expression(5, regA_index, regA_index); // n+6: ADD B B
 		// c = c + c;	// ADD C C
@@ -3705,24 +3706,26 @@ void unknownModulo(long long a, long long b){ //TODO
 		rozkazDoKolejki_expression(4, regX_index, regA_index); // n+9: COPY X A
 		rozkazDoKolejki_expression(8, regX_index, -1); // n+10: INC X
 		rozkazDoKolejki_expression(6, regX_index, regB_index); // n+11: SUB X B
-		rozkazDoKolejki_expression(11, regX_index, n + 15); // n+12: JZERO X (n+12)+3
+		exp_jzero.push(n + 15);
+		rozkazDoKolejki_expression(11, regX_index, 121); // n+12: JZERO X (n+12)+3
 		//if (a >= b) {
 			
 			// a = a - b; // SUB A B
-			rozkazDoKolejki_expression(6, regA_index, regB_index); // n+11: SUB A B
+			rozkazDoKolejki_expression(6, regA_index, regB_index); // n+13: SUB A B
 			// d = d + c; // ADD D C
-			rozkazDoKolejki_expression(5, -2, regC_index); // n+12: ADD D C
+			rozkazDoKolejki_expression(5, -2, regC_index); // n+14: ADD D C
 		//}
 	
 	// b = b / 2; // HALF B
-	rozkazDoKolejki_expression(7, regB_index, -1); // n+13: HALF B
+	rozkazDoKolejki_expression(7, regB_index, -1); // n+15: HALF B
 	// c = c / 2; // HALF C
-	rozkazDoKolejki_expression(7, regC_index, -1); // n+14: HALF C
+	rozkazDoKolejki_expression(7, regC_index, -1); // n+16: HALF C
 	
 	//} while (c != 0);
-	rozkazDoKolejki_expression(11, regC_index, n + 17); // n+15: JZERO C (n+15)+2
-	rozkazDoKolejki_expression(10, n + 9 + 100, -1); // n+16: JUMP n+9
-	rozkazDoKolejki_expression(4, -2, regA_index); // n+17: COPY D A
+	exp_jzero.push(n + 19);
+	rozkazDoKolejki_expression(11, regC_index, 121); // n+17: JZERO C (n+17)+2
+	rozkazDoKolejki_expression(10, n + 9 + 100, -1); // n+18: JUMP n+9
+	rozkazDoKolejki_expression(4, -2, regA_index); // n+19: COPY D A
 	rozkazDoKolejki_expression(6, regX_index, regX_index); // n+18: SUB X X	 
 	rozkazDoKolejki_expression(-2, regC_index, 0); // usuwam rejestr C w C++, ponieważ c==0		
 	rozkazDoKolejki_expression(-2, regX_index, 0); // usuwam rejestr X w C++, ponieważ x==0	
