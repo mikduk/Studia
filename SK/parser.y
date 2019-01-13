@@ -644,103 +644,43 @@ for_body:
     }
 
 |	DOWNTO value DO {
- 
-	Identifier a = identifierStack.at(expressionArguments[0]);
-        Identifier b = identifierStack.at(expressionArguments[1]);
+		
+		cout << "TO value: $2 = " << $2 << endl;
+		
+		addToReg("DOWNTO", "-1", -20);
+		temp_reg = regisX_index;
+		rozkazDoKolejki_condition(4, temp_reg, for_iterator.top());
+	
+		temp_ll = -1;
+		num_ide = -1;		
+		rozkazDoKolejki_condition(8, temp_reg, -1);
+		int regB;
+		if (num_ide == 1){
+			regB = findIndex($2);				
+		}
 
-        if(a.type == "NUMBER") {
-            //rejestr
-            removeIdentifier(a.name);
-        }
+		else if (num_ide == 0){
+			addToReg("-1", "-1", -1);
+			regB = regisX_index;
+			genNum_condition(regB, temp_ll);
+		}
+		rozkazDoKolejki_condition(6, temp_reg, regB);	
+		rozkazDoKolejki_condition(11, temp_reg, -8);			
 
-        else if(a.type == "IDENTIFIER") {
-            //rejestr
-        }
-
-        else {
-		Identifier index = identifierStack.at(argumentsTabIndex[0]);
-            
-		if(index.type == "NUMBER") {
-                
-                	//rejestr
-                	removeIdentifier(index.name);
-            	}
-
-		else {
-                
-			//rejestr
-	                pushCommand("ADD mejbi", -1, -1);
-	                pushCommand("STORE mejbi", -1, -1);
-	                pushCommand("LOAD mejbi", -1, -1);
-            }
-        }
-        
-	//rejestr
-        identifierStack.at(assignTarget.name).initialized = 1;
-
-        if(a.type != "ARRAY" && b.type != "ARRAY"){
-		//sub(a, b, 1, 1);
-	}
-        
-	else {
-	  	Identifier aI, bI;
-            
-		if(identifierStack.count(argumentsTabIndex[0]) > 0)
-                	aI = identifierStack.at(argumentsTabIndex[0]);
-
-		if(identifierStack.count(argumentsTabIndex[1]) > 0)
-                	bI = identifierStack.at(argumentsTabIndex[1]);
-            
-		//subTab(a, b, aI, bI, 1, 1);
-            	argumentsTabIndex[0] = "-1";
-            	argumentsTabIndex[1] = "-1";
-        }
-
-        expressionArguments[0] = "-1";
-        expressionArguments[1] = "-1";
-
-        Identifier s;
-        string name = "C" + to_string(depth);
-        createIdentifier(&s, name, 1, 0, 0, "IDENTIFIER");
-        insertIdentifier(name, s);
-
-        //rejestr
-        forStack.push_back(identifierStack.at(assignTarget.name));
-
-        pushCommand("JZERO", codeStack.size()+102, -1);
-        //rejestr
-        Jump j;
-        createJump(&j, codeStack.size(), depth);
-        jumpStack.push_back(j);
-        pushCommand("JZERO", -1, -1);
-        pushCommand("DEC", -1, -1);
-        //rejestr
-
-        assignFlag = true;
+		assignFlag = true;
 
 	} commands ENDFOR {
+	
+		rozkazDoKolejki_condition(9, for_iterator.top(), -1);
+		rozkazDoKolejki_condition(10, for_jump.top() + 100, -1);
+		for_jump.pop();
+		wykonajRozkazy_condition();
+		for_jzero.push(krok_pre);
+	        for_iterator.pop();
         	
-		Identifier iterator = forStack.at(forStack.size()-1);
-        	//rejestr
-        	pushCommand("DEC", -1, -1);
-        	//rejestr
-
-        	long long int jumpCount = jumpStack.size()-1;
-        	long long int stack = jumpStack.at(jumpCount).placeInStack-1;
-
-	        pushCommand("JUMP", stack+100, -1);
-	        //addInt(jumpStack.at(jumpCount).placeInStack, codeStack.size());
-		codeStack.at(jumpStack.at(jumpCount).placeInStack) = codeStack.at(jumpStack.at(jumpCount).placeInStack) + " " + to_string(codeStack.size());
-	        jumpStack.pop_back();
-
-        	string name = "C" + to_string(depth);
-        	removeIdentifier(name);
-        	removeIdentifier(iterator.name);
-        	forStack.pop_back();
-
         	depth--;
         	assignFlag = true;
-	}	
+    }
 ;
 
 expression:
