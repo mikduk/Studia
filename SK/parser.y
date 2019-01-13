@@ -2596,11 +2596,10 @@ void div_function(long long int a, long long int b) { //TODO
 		else{
 			int orginal_a, orginal_b, tr;			
 			orginal_b = findIndex_value(b);				
-			addToReg("DIV(B)", "-1", b);
-			genNum(b, regisX_index);
+			addToReg("DIV(B)", "-1", -100);
 			temp_reg = regisX_index;
 			orginal_a = findIndex_value(a);
-			addToReg("DIV(A)", "-1", a);
+			addToReg("DIV(A)", "-1", -100);
 			tr = regisX_index;
 			rozkazDoKolejki_expression(4, tr, orginal_a);
 			rozkazDoKolejki_expression(4, temp_reg, orginal_b);
@@ -2801,7 +2800,6 @@ void mod_function(long long int a, long long int b) { //TODO
 			int orginal_a, orginal_b, tr;			
 			orginal_b = findIndex_value(b);				
 			addToReg("DIV(B)", "-1", b);
-			genNum(b, regisX_index);
 			temp_reg = regisX_index;
 			orginal_a = findIndex_value(a);
 			addToReg("DIV(A)", "-1", a);
