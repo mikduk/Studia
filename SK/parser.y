@@ -27,14 +27,23 @@ typedef struct {
     long long int depth;
 } Jump;
 
+typedef struct {
+    string name;
+    long long int value;
+} Akumulator;
+
 vector<string> codeStack;
 vector<Jump> jumpStack;
 vector<Identifier> forStack;
 stack <int> while_jump;
 stack <int> while_jzero;
+stack <int> dowhile_jump;
+stack <int> dowhile_jzero;
 stack <int> if_jzero;
 stack <int> if_jodd;
 queue <int> exp_jzero;
+queue <int> not_equal;
+vector <Akumulator> akumulator;
 map<string, Identifier> identifierStack;
 //
 int yylex();
@@ -44,6 +53,7 @@ int yyerror(const string str);
 void pokazRejestr();
 int findIndex(string name);
 int findIndex_value(long long int value);
+int wolneRejestry();
 void addToReg(string name, string empty_name, long long int value);
 void removeFromReg_index(int index, string empty_name, long long int empty_value);
 void pushCommand(string str, int index1, int index2);
@@ -58,6 +68,8 @@ void sub_function(long long int a, long long int b);
 void mul_function(long long int a, long long int b);
 void div_function(long long int a, long long int b);
 void mod_function(long long int a, long long int b);
+void equal_function(long long int a, long long int b);
+void ne_function(long long int a, long long int b);
 void gt_function(long long int a, long long int b);
 void lt_function(long long int a, long long int b);
 void ge_function(long long int a, long long int b);
@@ -412,7 +424,7 @@ command:
 |	while_body condition { assignFlag = true;
 		while_jump.push(krok_pre); // JUMP krok
 		cout << "jump1 = " << while_jump.top() << endl; //test
-		rozkazDoKolejki_condition(11, condition_reg, -1);
+		rozkazDoKolejki_condition(11, condition_reg, -6);
 		wykonajRozkazy_condition();
 		 
 	} DO 
@@ -432,7 +444,21 @@ command:
 
 	}
 
-|	DO commands while_body condition ENDDO {
+|	DO {cout << "jj" << endl; cout << "dowhile_jump.push" << endl; dowhile_jump.push(krok_pre); } commands while_body condition ENDDO {
+
+		rozkazDoKolejki_condition(11, condition_reg, -7);
+		
+		cout << "jump2 = " << krok_pre+1 << endl; //test
+		rozkazDoKolejki_condition(10, -4, dowhile_jump.top() + 900); // trochę głupia sprawa, ale jest +900, bo później jest jeszcze + 100 i wchodzi w ifa ">=1000"
+		dowhile_jump.pop();
+		wykonajRozkazy_condition();
+		cout << "krok_pre = " << krok_pre << endl;
+		dowhile_jzero.push(krok_pre);
+		cout << "   NIC" << endl;
+	 /* JUMP krok */ cout << "jump1 = " << dowhile_jzero.top() << endl; /*test*/  
+		//wykonajRozkazy(); 
+        	depth--;
+        	assignFlag = true;
 	
 	}
 
@@ -480,6 +506,7 @@ command:
             		rozkazDoKolejki_condition(0, regisX_index, -1); //pushCommand("GET", regisX_index, -1); 
 			wykonajRozkazy_condition();            		
 			pokazRejestr();
+			num_ide = -1; cout << "num_ide = -1;" << endl;
 			
         	}
         	
@@ -493,13 +520,19 @@ command:
 
 |	WRITE { assignFlag = false; } value SEM {
 		rozkazDoKolejki_condition(1, regisX_index, -1); // pushCommand("PUT", regisX_index, -1);
-		wykonajRozkazy_condition(); 
+		wykonajRozkazy_condition();
+		num_ide = -1; cout << "num_ide = -1;" << endl; 
 		assignFlag = true;
 	}
 ;
 
 while_body:
-	WHILE { assignFlag = false; depth++; }
+	WHILE {
+	
+	assignFlag = false;
+	
+	depth++; 
+	}
 ;
 
 if_body:
@@ -533,9 +566,8 @@ if_body:
         
 		cout << "ENDIF - całe szczęście :)" << endl;
 		wykonajRozkazy_condition();
-		cout << "Wykonałem rozkazy w ENDIF i if_jzero.push(krok_pre)x2" << endl;
+		cout << "Wykonałem rozkazy w ENDIF i if_jzero.push(krok_pre)" << endl;
 		cout << "krok_pre = " << krok_pre << endl;
-		if_jzero.push(krok_pre);
 		if_jzero.push(krok_pre);		
 
 	        depth--;
@@ -744,6 +776,7 @@ expression:
 			if (num_ide == 80){
 				a = atoll($1);
 				b = atoll($3);
+				add_function(a, b);
 			}
 
 			else if (num_ide == 11){				
@@ -753,22 +786,41 @@ expression:
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
 				cout << "vAv n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+				if (a_ind == b_ind){ 
+					rozkazDoKolejki_expression(4, -2, a_ind); // COPY X A
+					rozkazDoKolejki_expression(5, -2, -2); // ADD X X
+				}
+				else
+					add_function(a, b);
 			}
 
 			else if (num_ide == 81){
 				a = atoll($1);
 				int b_ind = findIndex($3);
 				b = regis_value[b_ind];
+				if (a < 8){ 
+					rozkazDoKolejki_expression(4, -2, b_ind); // COPY X B
+					for (int i=0; i<a; i++)
+						rozkazDoKolejki_expression(8, -2, -1); // INC X
+				}
+				else
+					add_function(a, b);
 			}
 
 			else if (num_ide == 10){
 				int a_ind = findIndex($1);
 				a = regis_value[a_ind];
 				b = atoll($3);
+				if (b < 8){ 
+					rozkazDoKolejki_expression(4, -2, a_ind); // COPY X A
+					for (int i=0; i<b; i++)
+						rozkazDoKolejki_expression(8, -2, -1); // INC X
+				}
+				else
+					add_function(a, b);
 			}  
 
 
-			add_function(a, b);
 		}
         
 		else {
@@ -803,6 +855,7 @@ expression:
 			if (num_ide == 80){
 				a = atoll($1);
 				b = atoll($3);
+				sub_function(a, b);
 			}
 
 			else if (num_ide == 11){				
@@ -812,22 +865,37 @@ expression:
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
 				cout << "vSv n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+				if (a_ind == b_ind){
+					rozkazDoKolejki_expression(6, -2, -2);
+					
+				}
+				else
+					sub_function(a, b);
 			}
 
 			else if (num_ide == 81){
 				a = atoll($1);
 				int b_ind = findIndex($3);
 				b = regis_value[b_ind];
+				sub_function(a, b);
 			}
 
 			else if (num_ide == 10){
 				int a_ind = findIndex($1);
 				a = regis_value[a_ind];
 				b = atoll($3);
+				if (b < 8){ 
+					rozkazDoKolejki_expression(4, -2, a_ind); // COPY X A
+					for (int i=0; i<b; i++)
+						rozkazDoKolejki_expression(9, -2, -1); // DEC X
+				}
+				else
+					sub_function(a, b);
 			}  
 
 
-			sub_function(a, b);
+
+			
 		}
         
 		else {
@@ -1035,8 +1103,12 @@ expression:
 				b = regis_value[b_ind];
 				cout << "vDv n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
 				if (a_ind == b_ind){
+					
+					wykonajRozkazy_expression();
+					exp_jzero.push(krok_pre + 3);
 					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(8, -2, -1);
+					rozkazDoKolejki_expression(11, a_ind, 121);
+						rozkazDoKolejki_expression(8, -2, -1);
 					temp_ll = 1;
 				}
 				else
@@ -1055,6 +1127,7 @@ expression:
 			}
 
 			else if (num_ide == 10){
+				cout << "####### ^^ JESTEM SZEFIE! " << endl; 
 				int a_ind = findIndex($1);
 				a = regis_value[a_ind];
 				b = atoll($3);
@@ -1067,6 +1140,7 @@ expression:
 					rozkazDoKolejki_expression(4, -2, a_ind);
 					break;
 				case 2:
+					cout << "@@@@@@@@@@@@@@22@@ Tu powinien być HALT" << endl;
 					rozkazDoKolejki_expression(4, -2, a_ind);
 					rozkazDoKolejki_expression(7, -2, -1);
 					break;
@@ -1252,7 +1326,7 @@ condition:
 			}  
 
 
-			add_function(a, b);
+			equal_function(a, b);
 			num_ide = -1; cout << "num_ide = -1;" << endl;
 		}
         
@@ -1274,35 +1348,69 @@ condition:
 		expressionArguments[0] = "-1";
 		expressionArguments[1] = "-1";
 	}
-|	value NOT_EQUAL value {
-	
-			Identifier a = identifierStack.at(expressionArguments[0]);
-        		Identifier b = identifierStack.at(expressionArguments[1]);
+|	value NOT_EQUAL value { //dupa
 
-        		if(a.type == "NUMBER" && b.type == "NUMBER") {
-            
-				if(stoll(a.name) != stoll(b.name))
- 	               			cout << "PRAWDA" << endl;
-            			else
-                			cout << "FAŁSZ" << endl;
-            
-				removeIdentifier(a.name);
-            			removeIdentifier(b.name);
-        		}
+		cout << "Jestem w value NE value" << endl;
+
+		dzialanie_przemienne = 1;
+
+		//	num != num	ide != ide	num != ide	ide != num	
+		if(num_ide == 80 || num_ide == 11 || num_ide == 81 || num_ide == 10){
+            			
+			long long int a;
+			long long int b; 
+
+			if (num_ide == 80){
+				a = atoll($1);
+				b = atoll($3);
+			}
+
+			else if (num_ide == 11){				
+				int a_ind = findIndex($1);
+				int b_ind = findIndex($3);
+				cout << "v!=v n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
+				a = regis_value[a_ind];
+				b = regis_value[b_ind];
+				cout << "v!=v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
+				if (a_ind == b_ind){
+					//dupa
+				}
+			}
+
+			else if (num_ide == 81){
+				a = atoll($1);
+				int b_ind = findIndex($3);
+				b = regis_value[b_ind];
+			}
+
+			else if (num_ide == 10){
+				int a_ind = findIndex($1);
+				a = regis_value[a_ind];
+				b = atoll($3);
+			}  
+
+
+			ne_function(a, b);
+			num_ide = -1; cout << "num_ide = -1;" << endl;
+		}
         
-			else {
-	            		cout << "Porównywanie innych typów na razie za trudne" << endl;
-        		}
+		else {
+	            		/*Identifier aI, bI;
+	
+	            		if(identifierStack.count(argumentsTabIndex[0]) > 0)
+	                		aI = identifierStack.at(argumentsTabIndex[0]);
 
-        		Jump j;
-        		createJump(&j, codeStack.size(), depth);
-        		jumpStack.push_back(j);
-        		pushCommand("JZERO", 100, -1);
+	            		if(identifierStack.count(argumentsTabIndex[1]) > 0)
+	                		bI = identifierStack.at(argumentsTabIndex[1]);
 
-        		expressionArguments[0] = "-1";
-        		expressionArguments[1] = "-1";
-			argumentsTabIndex[0] = "-1";
-        		argumentsTabIndex[1] = "-1";
+	            		addTab(a, b, aI, bI);
+
+	            		argumentsTabIndex[0] = "-1";
+	            		argumentsTabIndex[1] = "-1"; */
+		}
+
+		expressionArguments[0] = "-1";
+		expressionArguments[1] = "-1";
 	}
 |	value GT value { //dupa
 
@@ -1729,6 +1837,14 @@ void pushCommand(string str, int r1, int r2){
 			cout << krok << ": " << str << " " << r1 - 100 << endl;
 			fout << krok++ << ": " << str << " " << r1 - 100 << endl;		
 		}
+		//NOT_EQUAL
+		else if (r1 == -5){
+			cout << "pushCommand (r1 == -5) -> " << str << " " << r1 << " " << r2 << endl;
+			
+			cout << krok << ": " << str << " " << not_equal.front() << endl;
+			fout << krok++ << ": " << str << " " << not_equal.front() << endl;
+			not_equal.pop();		
+		}
 		
 		else{
 			cout << "pushCommand -> " << str << " " << r1 << " " << r2 << endl;
@@ -1771,12 +1887,48 @@ void pushCommand(string str, int r1, int r2){
 	//EXP JZERO
 	else if (r2 == 121){
 		char r = 'A'+r1;
-			cout << "pushCommand (r2 > 100) -> " << str << " " << r << " " << r2 << endl;
+			cout << "pushCommand (r2 > 121) -> " << str << " " << r << " " << r2 << endl;
 			cout << krok << ": " << str << " " << r << " " << exp_jzero.front() << endl;
 			fout << krok++ << ": " << str << " " << r << " " << exp_jzero.front() << endl;
 			cout << "exp_jzero.pop();" << endl;
 			exp_jzero.pop();
-	}	
+	}
+	//EXP JODD
+	else if (r2 == 122){
+		char r = 'A'+r1;
+			cout << "pushCommand (r2 > 122) -> " << str << " " << r << " " << r2 << endl;
+			cout << krok << ": " << str << " " << r << " " << exp_jzero.front() << endl;
+			fout << krok++ << ": " << str << " " << r << " " << exp_jzero.front() << endl;
+			cout << "exp_jzero.pop();" << endl;
+			exp_jzero.pop();
+	}
+	//WHILE JODD
+	else if (r2 == 113){
+		char r = 'A'+r1;
+			cout << "pushCommand (r2 > 113) -> " << str << " " << r << " " << r2 << endl;
+			cout << krok << ": " << str << " " << r << " " << while_jzero.top() << endl;
+			fout << krok++ << ": " << str << " " << r << " " << while_jzero.top() << endl;
+			cout << "while.pop();" << endl;
+			while_jzero.pop();
+	}
+	//DOWHILE JODD
+	else if (r2 == 114){
+		char r = 'A'+r1;
+			cout << "pushCommand (r2 > 122) -> " << str << " " << r << " " << r2 << endl;
+			cout << krok << ": " << str << " " << r << " " << dowhile_jzero.top() << endl;
+			fout << krok++ << ": " << str << " " << r << " " << dowhile_jzero.top() << endl;
+			cout << "dowhile_jzero.pop();" << endl;
+			dowhile_jzero.pop();
+	}				
+	//NOT_EQUAL JODD	
+	else if (r2 == -5){
+		char r = 'A'+r1;
+			cout << "pushCommand (r2 > 100) -> " << str << " " << r << " " << r2 << endl;
+			cout << krok << ": " << str << " " << r << " " << not_equal.front() << endl;
+			fout << krok++ << ": " << str << " " << r << " " << not_equal.front() << endl;
+			cout << "not_equal.pop();" << endl;
+			not_equal.pop();
+	}			
 	else{
 		char a = 'A'+r1;
 		char b = 'A'+r2;
@@ -3689,27 +3841,399 @@ void le_function(long long int a, long long int b) { //TODO
     	}
 }
 
+void equal_function(long long int a, long long int b) { //TODO
+
+	cout << "WEJŚCIE DO equal_function: a = " << a << ", b = " << b << endl;		
+	
+	// num == num
+	if ( num_ide == 80 ) { 
+        	
+		cout << "equal_function PRZED (1) -> temp_flag = " << temp_flag << endl;
+		if (a == b)
+			temp_flag = 1;
+		else
+			temp_flag = 0;
+		cout << "equal_function PO (1) -> temp_flag = " << temp_flag << endl;		
+		
+		
+				addToReg("A==B(A)", "-1", a);
+				int A_reg = regisX_index;
+				genNum_condition(a, A_reg);
+
+				addToReg("A==B(B)", "-1", b);
+				int B_reg = regisX_index;
+				genNum_condition(b, B_reg);
+
+				addToReg("A==B", "-1", a);
+				condition_reg = regisX_index;
+				rozkazDoKolejki_condition(4, condition_reg, A_reg); // COPY X A
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B
+
+				rozkazDoKolejki_condition(6, B_reg, A_reg); // SUB B A
+
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B 
+
+				rozkazDoKolejki_condition(6, A_reg, A_reg); // SUB A A	
+				rozkazDoKolejki_condition(-2, A_reg, 0); // usuwam rejestr A w C++
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB B B	
+				rozkazDoKolejki_condition(-2, B_reg, 0); // usuwam rejestr B w C++			
+		
+    	}
+    
+	// num == ide
+	else if ( num_ide == 81 ) { 
+        	
+		cout << "equal_function PRZED (2) -> temp_flag = " << temp_flag << endl;
+		if (b >= 0){
+			if (a == b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "equal_function PO (2) -> temp_flag = " << temp_flag << endl;		
+		
+				addToReg("A==B(A)", "-1", a);
+				int A_reg = regisX_index;
+				genNum_condition(a, A_reg);
+
+				int orginal_B_reg = findIndex_value(b);
+				addToReg("A==B(B)", "-1", b);
+				int B_reg = regisX_index;
+				rozkazDoKolejki_condition(4, B_reg, orginal_B_reg);
+
+				addToReg("A==B", "-1", a);
+				condition_reg = regisX_index;
+				rozkazDoKolejki_condition(4, condition_reg, A_reg); // COPY X A
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B
+
+				rozkazDoKolejki_condition(6, B_reg, A_reg); // SUB B A
+
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B 
+
+				rozkazDoKolejki_condition(6, A_reg, A_reg); // SUB A A	
+				rozkazDoKolejki_condition(-2, A_reg, 0); // usuwam rejestr A w C++
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB B B	
+				rozkazDoKolejki_condition(-2, B_reg, 0); // usuwam rejestr B w C++	
+    	}
+
+	// ide == num
+	else if ( num_ide == 10 ) { 
+        	
+		cout << "equal_function PRZED (3) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0){
+			if (a == b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "equal_function PO (3) -> temp_flag = " << temp_flag << endl;
+
+				addToReg("A==B(B)", "-1", b);
+				int B_reg = regisX_index;
+				genNum_condition(b, B_reg);
+
+				int orginal_A_reg = findIndex_value(a);
+				addToReg("A==B(A)", "-1", a);
+				int A_reg = regisX_index;
+				rozkazDoKolejki_condition(4, A_reg, orginal_A_reg);
+
+				addToReg("A==B", "-1", a);
+				condition_reg = regisX_index;
+				rozkazDoKolejki_condition(4, condition_reg, A_reg); // COPY X A
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B
+
+				rozkazDoKolejki_condition(6, B_reg, A_reg); // SUB B A
+
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B 
+
+				rozkazDoKolejki_condition(6, A_reg, A_reg); // SUB A A	
+				rozkazDoKolejki_condition(-2, A_reg, 0); // usuwam rejestr A w C++
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB B B	
+				rozkazDoKolejki_condition(-2, B_reg, 0); // usuwam rejestr B w C++	
+		
+    	}
+
+	// ide == ide
+	else if ( num_ide == 11 ) { 
+        	
+		cout << "equal_function PRZED (4) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0 && b >= 0){
+			if (a == b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "equal_function PO (4) -> temp_flag = " << temp_flag << endl;
+
+				int orginal_A_reg = findIndex_value(a);
+				addToReg("A==B(A)", "-1", a);
+				int A_reg = regisX_index;
+				rozkazDoKolejki_condition(4, A_reg, orginal_A_reg);
+
+				int orginal_B_reg = findIndex_value(b);
+				addToReg("A==B(B)", "-1", b);
+				int B_reg = regisX_index;
+				rozkazDoKolejki_condition(4, B_reg, orginal_B_reg);
+
+				addToReg("A==B", "-1", a);
+				condition_reg = regisX_index;
+				rozkazDoKolejki_condition(4, condition_reg, A_reg); // COPY X A
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B
+
+				rozkazDoKolejki_condition(6, B_reg, A_reg); // SUB B A
+
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B 
+
+				rozkazDoKolejki_condition(6, A_reg, A_reg); // SUB A A	
+				rozkazDoKolejki_condition(-2, A_reg, 0); // usuwam rejestr A w C++
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB B B	
+				rozkazDoKolejki_condition(-2, B_reg, 0); // usuwam rejestr B w C++	
+	}
+}
+
+void ne_function(long long int a, long long int b) { //TODO
+
+	cout << "WEJŚCIE DO ne_function: a = " << a << ", b = " << b << endl;		
+	
+	// num != num
+	if ( num_ide == 80 ) { 
+        	
+		cout << "ne_function PRZED (1) -> temp_flag = " << temp_flag << endl;
+		if (a != b)
+			temp_flag = 1;
+		else
+			temp_flag = 0;
+		cout << "ne_function PO (1) -> temp_flag = " << temp_flag << endl;		
+		
+								
+				
+				addToReg("A==B(A)", "-1", a);
+				int A_reg = regisX_index;
+				genNum_condition(a, A_reg);
+
+				addToReg("A==B(B)", "-1", b);
+				int B_reg = regisX_index;
+				genNum_condition(b, B_reg);
+
+				wykonajRozkazy_condition();
+				int n = krok_pre + 1;
+
+				addToReg("A==B", "-1", a);
+				condition_reg = regisX_index;
+				rozkazDoKolejki_condition(4, condition_reg, A_reg); // COPY X A
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B
+
+				rozkazDoKolejki_condition(6, B_reg, A_reg); // SUB B A
+
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B 
+
+				rozkazDoKolejki_condition(6, A_reg, A_reg); // SUB A A	
+				rozkazDoKolejki_condition(-2, A_reg, 0); // usuwam rejestr A w C++
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB B B	
+				rozkazDoKolejki_condition(-2, B_reg, 0); // usuwam rejestr B w C++
+
+				not_equal.push(n + 11);
+				rozkazDoKolejki_condition(12, condition_reg, -5); // j: JODD X j+5
+				rozkazDoKolejki_condition(9, condition_reg, -1); // DEC X
+				not_equal.push(n + 11);
+				rozkazDoKolejki_condition(12, condition_reg, -5); // j+2: JODD X j+5
+				rozkazDoKolejki_condition(8, condition_reg, -1); // INC X
+				not_equal.push(n + 12);
+				rozkazDoKolejki_condition(10, -5, -1); // n: JUMP n+2
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB X X    			
+		
+    	}
+    
+	// num != ide
+	else if ( num_ide == 81 ) { 
+        	
+		cout << "equal_function PRZED (2) -> temp_flag = " << temp_flag << endl;
+		if (b >= 0){
+			if (a == b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "equal_function PO (2) -> temp_flag = " << temp_flag << endl;		
+		
+				addToReg("A==B(A)", "-1", a);
+				int A_reg = regisX_index;
+				genNum_condition(a, A_reg);
+
+				int orginal_B_reg = findIndex_value(b);
+				addToReg("A==B(B)", "-1", b);
+				int B_reg = regisX_index;
+				rozkazDoKolejki_condition(4, B_reg, orginal_B_reg);
+
+				wykonajRozkazy_condition();
+				int n = krok_pre + 1;
+
+				addToReg("A==B", "-1", a);
+				condition_reg = regisX_index;
+				rozkazDoKolejki_condition(4, condition_reg, A_reg); // COPY X A
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B
+
+				rozkazDoKolejki_condition(6, B_reg, A_reg); // SUB B A
+
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B 
+
+				rozkazDoKolejki_condition(6, A_reg, A_reg); // SUB A A	
+				rozkazDoKolejki_condition(-2, A_reg, 0); // usuwam rejestr A w C++
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB B B	
+				rozkazDoKolejki_condition(-2, B_reg, 0); // usuwam rejestr B w C++
+
+				not_equal.push(n + 11);
+				rozkazDoKolejki_condition(12, condition_reg, -5); // j: JODD X j+5
+				rozkazDoKolejki_condition(9, condition_reg, -1); // DEC X
+				not_equal.push(n + 11);
+				rozkazDoKolejki_condition(12, condition_reg, -5); // j+2: JODD X j+5
+				rozkazDoKolejki_condition(8, condition_reg, -1); // INC X
+				not_equal.push(n + 12);
+				rozkazDoKolejki_condition(10, -5, -1); // n: JUMP n+2
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB X X 	
+    	}
+
+	// ide != num
+	else if ( num_ide == 10 ) { 
+        	
+		cout << "equal_function PRZED (3) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0){
+			if (a == b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "equal_function PO (3) -> temp_flag = " << temp_flag << endl;
+
+				addToReg("A==B(B)", "-1", b);
+				int B_reg = regisX_index;
+				genNum_condition(b, B_reg);
+
+				int orginal_A_reg = findIndex_value(a);
+				addToReg("A==B(A)", "-1", a);
+				int A_reg = regisX_index;
+				rozkazDoKolejki_condition(4, A_reg, orginal_A_reg);
+
+				wykonajRozkazy_condition();
+				int n = krok_pre + 1;
+
+				addToReg("A==B", "-1", a);
+				condition_reg = regisX_index;
+				rozkazDoKolejki_condition(4, condition_reg, A_reg); // COPY X A
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B
+
+				rozkazDoKolejki_condition(6, B_reg, A_reg); // SUB B A
+
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B 
+
+				rozkazDoKolejki_condition(6, A_reg, A_reg); // SUB A A	
+				rozkazDoKolejki_condition(-2, A_reg, 0); // usuwam rejestr A w C++
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB B B	
+				rozkazDoKolejki_condition(-2, B_reg, 0); // usuwam rejestr B w C++
+
+				not_equal.push(n + 11);
+				rozkazDoKolejki_condition(12, condition_reg, -5); // j: JODD X j+5
+				rozkazDoKolejki_condition(9, condition_reg, -1); // DEC X
+				not_equal.push(n + 11);
+				rozkazDoKolejki_condition(12, condition_reg, -5); // j+2: JODD X j+5
+				rozkazDoKolejki_condition(8, condition_reg, -1); // INC X
+				not_equal.push(n + 12);
+				rozkazDoKolejki_condition(10, -5, -1); // n: JUMP n+2
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB X X 	
+		
+    	}
+
+	// ide != ide
+	else if ( num_ide == 11 ) { 
+        	
+		cout << "equal_function PRZED (4) -> temp_flag = " << temp_flag << endl;
+		if (a >= 0 && b >= 0){
+			if (a == b)
+				temp_flag = 1;
+			else
+				temp_flag = 0;
+		}
+		else{
+			temp_flag = -1;
+		}
+		cout << "equal_function PO (4) -> temp_flag = " << temp_flag << endl;
+
+				int orginal_A_reg = findIndex_value(a);
+				addToReg("A==B(A)", "-1", a);
+				int A_reg = regisX_index;
+				rozkazDoKolejki_condition(4, A_reg, orginal_A_reg);
+
+				int orginal_B_reg = findIndex_value(b);
+				addToReg("A==B(B)", "-1", b);
+				int B_reg = regisX_index;
+				rozkazDoKolejki_condition(4, B_reg, orginal_B_reg);
+
+				wykonajRozkazy_condition();
+				int n = krok_pre + 1;
+
+				addToReg("A==B", "-1", a);
+				condition_reg = regisX_index;
+				rozkazDoKolejki_condition(4, condition_reg, A_reg); // COPY X A
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B
+
+				rozkazDoKolejki_condition(6, B_reg, A_reg); // SUB B A
+
+				rozkazDoKolejki_condition(6, condition_reg, B_reg); // SUB X B 
+
+				rozkazDoKolejki_condition(6, A_reg, A_reg); // SUB A A	
+				rozkazDoKolejki_condition(-2, A_reg, 0); // usuwam rejestr A w C++
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB B B	
+				rozkazDoKolejki_condition(-2, B_reg, 0); // usuwam rejestr B w C++
+
+				not_equal.push(n + 11);
+				rozkazDoKolejki_condition(12, condition_reg, -5); // j: JODD X j+5
+				rozkazDoKolejki_condition(9, condition_reg, -1); // DEC X
+				not_equal.push(n + 11);
+				rozkazDoKolejki_condition(12, condition_reg, -5); // j+2: JODD X j+5
+				rozkazDoKolejki_condition(8, condition_reg, -1); // INC X
+				not_equal.push(n + 12);
+				rozkazDoKolejki_condition(10, -5, -1); // n: JUMP n+2
+				rozkazDoKolejki_condition(6, B_reg, B_reg); // SUB X X 	
+	}
+}
+
 void unknownMultiplication(long long int a, long long int b) {
 	//long long int wynik = 0;
 	int n = krok + 1;
 	rozkazDoKolejki_expression(6, -2, -2); // SUB C C
-	regisX_index = findIndex_value(b);
-	regisY_index = findIndex_value(a);
+	int regB = findIndex_value(b);
+	int regA = findIndex_value(a);
 	
 	exp_jzero.push(n + 9);
-	rozkazDoKolejki_expression(11, regisX_index, 121); // JZERO B (n+1)+8
+	rozkazDoKolejki_expression(11, regB, 121); // JZERO B (n+1)+8
       
 	//while (b > 0) {
-	rozkazDoKolejki_expression(8, regisX_index, -1); // INC B
-	rozkazDoKolejki_expression(12, regisX_index, -1); // JODD B		
+	rozkazDoKolejki_expression(8, regB, -1); // INC B
+	exp_jzero.push(n + 5);	
+	rozkazDoKolejki_expression(12, regB, 122); // JODD B (n+3)+2		
 		//if (b%2 == 1){
-			rozkazDoKolejki_expression(5, -2, regisY_index); // ADD C A
+			rozkazDoKolejki_expression(5, -2, regA); // ADD C A
 			//wynik += a;
 		//}
-	rozkazDoKolejki_expression(9, regisX_index, -1); // DEC B
-	rozkazDoKolejki_expression(5, regisY_index, regisY_index); // ADD A A
+	rozkazDoKolejki_expression(9, regB, -1); // DEC B
+	rozkazDoKolejki_expression(5, regA, regA); // ADD A A
         //a <<= 1;
-	rozkazDoKolejki_expression(7, regisX_index, -1); // ADD A A
+	rozkazDoKolejki_expression(7, regA, -1); // ADD A A
         //b >>= 1;
       //}
 	rozkazDoKolejki_expression(10, n + 1 + 100, -1); // JUMP n+1
@@ -4006,6 +4530,18 @@ int findIndex_value(long long int value){
 		return -1; 
 }
 
+int wolneRejestry(){
+	int wolne_rejestry = 0;
+
+	for (int i = 0; i < 8; i++){
+		if (regis_value[i] == 0 || regis_value[i] == -1){
+			wolne_rejestry++;
+		}
+	}
+
+	return wolne_rejestry;
+}
+
 void addToReg(string name, string empty_name, long long int value){
 	bool end = false;	
 	for (int i=0; i<8; i++){
@@ -4128,9 +4664,27 @@ void wykonajRozkazy(){
 			rozkazy[i][2] = 200;
 			pushCommand("JODD", rozkazy[i][1], rozkazy[i][2]);
 			break;
+		case 113: //WHILE JZERO
+			rozkazy[i][2] = 113;
+			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
+			break;
+		case 114: //DOWHILE JZERO
+			rozkazy[i][2] = 114;
+			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
+			break;
 		case 121: //EXP JZERO 
 			rozkazy[i][2] = 121;
 			pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
+			break;
+		case 122: //EXP JODD 
+			rozkazy[i][2] = 122;
+			pushCommand("JODD", rozkazy[i][1], rozkazy[i][2]);
+			break;
+		case -5: //NOT_EQUAL 
+			if (rozkazy[i][1] == -5)
+				pushCommand("JUMP", rozkazy[i][1], rozkazy[i][2]);
+			else			
+				pushCommand("JZERO", rozkazy[i][1], rozkazy[i][2]);
 			break;
 		case -2:
 			cout << "W tym miejscu USUWAM rejestr B z dzielenia, index = " << regisX_index << endl; // test
@@ -4153,7 +4707,7 @@ void wykonajRozkazy_expression(){
 		
 	for (int i=0; i<rozkazy_index_expression; i++){
 		
-		
+		cout << "wykonajRozkazy_expression(){" << endl;
 
 		if (rozkazy_expression[i][0]==-1)
 			break;
@@ -4170,6 +4724,8 @@ void wykonajRozkazy_expression(){
 				rozkazy_expression[i][2] = regisY_index;
 			else if (rozkazy_expression[i][2] == 121)
 				rozkazy_expression[i][0] = 121;
+			else if (rozkazy_expression[i][2] == 122)
+				rozkazy_expression[i][0] = 122;
 			
 			rozkazDoKolejki(rozkazy_expression[i][0], rozkazy_expression[i][1], rozkazy_expression[i][2]);
 			
@@ -4206,7 +4762,9 @@ void wykonajRozkazy_condition(){
 				rozkazy_condition[i][1] = rozkazy_condition[i][2] + 100;
 				cout << "Minusjedynkuję rozkazy_condition[i][2], a rozkazy_condition[i][1] = " << rozkazy_condition[i][1] << endl;
 				rozkazy_condition[i][2] = -1;
-			}			
+			}
+			else if (rozkazy_condition[i][1] == -5)
+				rozkazy_condition[i][0] = -5;			
 	
 			if (rozkazy_condition[i][2] == -2)
 				rozkazy_condition[i][2] = regisX_index;
@@ -4219,10 +4777,17 @@ void wykonajRozkazy_condition(){
 				else
 					rozkazy_condition[i][0] = 112; // IF JODD 								
 			}
+			else if (rozkazy_condition[i][2] == -5)
+				rozkazy_condition[i][0] = -5;
+			else if (rozkazy_condition[i][2] == -6)				
+					rozkazy_condition[i][0] = 113; // WHILE JZERO
+			else if (rozkazy_condition[i][2] == -7)				
+					rozkazy_condition[i][0] = 114; // DOWHILE JZERO
 			rozkazDoKolejki(rozkazy_condition[i][0], rozkazy_condition[i][1], rozkazy_condition[i][2]);
 			
 		}
-		krok_pre++;
+		if (rozkazy_condition[i][0] != -2)
+			krok_pre++;
 	}
 
 	cout << "Wyjście z pętli" << endl;
