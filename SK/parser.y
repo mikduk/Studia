@@ -1164,12 +1164,12 @@ expression:
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
 				cout << "v%v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
-				if (a_ind == b_ind){
+				if (a_ind == b_ind ){
 					rozkazDoKolejki_expression(6, -2, -2);
 					temp_ll = 0;
 				}
 				else
-					mod_function(a, b);
+					mod_function(a_ind, b_ind);
 			}
 
 			else if (num_ide == 81){
@@ -3119,45 +3119,44 @@ void mod_function(long long int a, long long int b) { //TODO
 	else if ( num_ide == 11 ) { 
         	
 		cout << "mod_function PRZED (4) -> temp_ll = " << temp_ll << endl;
-		if (b == 0)
+		if (regis_value[b] == 0)
 		temp_ll = 0;
 		else		
-		temp_ll = a % b;
+		temp_ll = regis_value[a] % regis_value[b];
 		cout << "mod_function PO (4) -> temp_ll = " << temp_ll << endl;		
 		
-		if (a == b){
+		if (regis_value[a] == regis_value[b] && regis_value[a] >= 0){
 			rozkazDoKolejki_expression(6, -2, -2);
 		}
 
-		else if (b == 1){
-			genNum(a, -2);
+		else if (regis_value[b] == 1){
+			genNum(regis_value[a], -2);
 		}
 
-		else if (a == 1){
-			genNum(a, -2);
+		else if (regis_value[a] == 1){
+			genNum(regis_value[a], -2);
 			rozkazDoKolejki_expression(6, -2, -2);
 			rozkazDoKolejki_expression(8, -2, -1);
 		}
 
-		else if (a == 0 || b == 0){
+		else if (regis_value[a] == 0 || regis_value[b] == 0){
 			rozkazDoKolejki_expression(6, -2, -2);
 		}	
 			
-		else{
-			int orginal_a, orginal_b, tr;			
-			orginal_b = findIndex_value(b);				
-			addToReg("DIV(B)", "-1", b);
+		else{	
+			int tr;							
+			addToReg("DIV(B)", "-1", regis_value[b]);
 			temp_reg = regisX_index;
-			orginal_a = findIndex_value(a);
-			addToReg("DIV(A)", "-1", a);
+			
+			addToReg("DIV(A)", "-1", regis_value[a]);
 			tr = regisX_index;
-			rozkazDoKolejki_expression(4, tr, orginal_a);
-			rozkazDoKolejki_expression(4, temp_reg, orginal_b);
-			if (a >= 0 && b >= 0)  
+			rozkazDoKolejki_expression(4, tr, a);
+			rozkazDoKolejki_expression(4, temp_reg, b);
+			if (regis_value[a] >= 0 && regis_value[b] >= 0)  
 				knownModulo(a, b);
 			else{
 				wykonajRozkazy_expression();
-				unknownModulo(a, b);
+				unknownModulo(regis_value[a], regis_value[b]);
 			}
 			rozkazDoKolejki_expression(6, temp_reg, temp_reg); //usuwam rejestr A
 			rozkazDoKolejki_expression(6, tr, tr); //usuwam rejestr B
@@ -4443,7 +4442,7 @@ void unknownModulo(long long a, long long b){ //TODO
 	rozkazDoKolejki_expression(11, regC_index, 121); // n+17: JZERO C (n+17)+2
 	rozkazDoKolejki_expression(10, n + 9 + 100, -1); // n+18: JUMP n+9
 	rozkazDoKolejki_expression(4, -2, regA_index); // n+19: COPY D A
-	rozkazDoKolejki_expression(6, regX_index, regX_index); // n+18: SUB X X	 
+	rozkazDoKolejki_expression(6, regX_index, regX_index); // n+20: SUB X X	 
 	rozkazDoKolejki_expression(-2, regC_index, 0); // usuwam rejestr C w C++, ponieważ c==0		
 	rozkazDoKolejki_expression(-2, regX_index, 0); // usuwam rejestr X w C++, ponieważ x==0	
 	//return d; //dzielenie
