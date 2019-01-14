@@ -61,6 +61,7 @@ void addToReg(string name, string empty_name, long long int value);
 void removeFromReg_index(int index, string empty_name, long long int empty_value);
 void pushCommand(string str, int index1, int index2);
 void createIdentifier(Identifier *s, string name, long long int isLocal, long long int tableStart, long long int tableEnd, string type);
+void createIterator(Identifier *s, string name, long long int isLocal, long long int tableStart, long long int tableEnd, string type);
 void insertIdentifier(string key, Identifier i);
 void removeIdentifier(string key);
 void createJump(Jump *j, long long int stack, long long int depth);
@@ -285,8 +286,7 @@ command:
 
 					else{
 						cout << "    NEW TEST[4]: regisX_index = " << regisX_index << endl;
-						if (regisX_index != regisY_index)
-							pushCommand("COPY", regisX_index, regisY_index);
+						
 						cout << "    NEW TEST[5]: regisX_index = " << regisX_index << endl;
 						wykonajRozkazy_expression();
 						regisY_index=0;
@@ -309,8 +309,7 @@ command:
 					
  					cout << "Przeszła pętla" << endl;
             				pokazRejestr();
-					if (regisX_index != regisY_index)
-	                			pushCommand("COPY", regisX_index, regisY_index);
+					
 					cout << "regisX_index = " << regisX_index << ", regisY_index = " << regisY_index << endl;
 					wykonajRozkazy_expression();
 					if (temp_reg != -1){
@@ -332,15 +331,6 @@ command:
 					
  					cout << "Przeszła pętla" << endl;
             				pokazRejestr();
-					
-					if (dzialanie_przemienne == 1){
-						if (regisX_index != regisY_index)
-	                			pushCommand("COPY", regisX_index, regisY_index);
-					}
-					
-					else{
-						//TODO
-					}
 		
 					wykonajRozkazy_expression();
 					if (temp_reg != -1){
@@ -385,9 +375,6 @@ command:
 
  					cout << "Przeszła pętla" << endl;
             				pokazRejestr();
-
-					if (regisX_index != regisY_index)
-	                			pushCommand("COPY", regisX_index, regisY_index);
 					
 					
 					cout << "regisX_index = " << regisX_index << ", regisY_index = " << regisY_index << endl;
@@ -435,12 +422,14 @@ command:
 	commands ENDWHILE {
         
 		wykonajRozkazy_condition();
-		cout << "while_jzero.push" << endl;
-		while_jzero.push(krok_pre + 1);
-		cout << "jump2 = " << krok_pre+1 << endl; //test
+		
 		rozkazDoKolejki_condition(10, -4, while_jump.top() + 900); // trochę głupia sprawa, ale jest +900, bo później jest jeszcze + 100 i wchodzi w ifa ">=1000"
 		while_jump.pop();
 		wykonajRozkazy_condition();
+
+		cout << "while_jzero.push" << endl;
+		while_jzero.push(krok_pre);
+		cout << "jump2 = " << krok_pre+1 << endl; //test
 		//wykonajRozkazy(); 
         	depth--;
         	assignFlag = true;
@@ -473,8 +462,9 @@ command:
 
         			else {
             				Identifier s;
-            				createIdentifier(&s, $2, 1, 0, 0, "IDENTIFIER");
+            				createIterator(&s, $2, 1, 0, 0, "IDENTIFIER");
             				insertIdentifier($2, s);
+					
         			}
 				string id = $2;
 				addToReg("ITERATOR("+id+")", "-1", -20);
@@ -515,7 +505,7 @@ command:
             		Identifier index = identifierStack.at(tabAssignTargetIndex);
             
 			if(index.type == "NUM") {
-                		pushCommand("GET", regisX_index, -1);
+                		//pushCommand("GET", regisX_index, -1);
                 		removeIdentifier(index.name);
             		}
             
@@ -548,7 +538,20 @@ command:
 	}
 
 |	WRITE { assignFlag = false; } value SEM {
-		rozkazDoKolejki_condition(1, regisX_index, -1); // pushCommand("PUT", regisX_index, -1);
+		cout << "==================READREADREAD" << $1 << $3 << $4 << endl;		
+		if (num_ide == 1){
+			regisX_index = findIndex($3);
+			rozkazDoKolejki_condition(1, regisX_index, -1); // pushCommand("PUT", regisX_index, -1);
+		}
+		else if (num_ide == 0){
+			cout << "@@@@@@@@@@@@@ regisX_index = " << regisX_index << endl;
+			addToReg("-1", "-1", -1);
+			cout << "@@@@@@@@@@@@@ regisX_index = " << regisX_index << endl;
+			genNum_condition(atoll($3), regisX_index);
+			cout << "@@@@@@@@@@@@@ regisX_index = " << regisX_index << endl;
+			rozkazDoKolejki_condition(1, regisX_index, -1); // pushCommand("PUT", regisX_index, -1);
+			cout << "@@@@@@@@@@@@@ regisX_index = " << regisX_index << endl;		
+		}
 		wykonajRozkazy_condition();
 		num_ide = -1; cout << "num_ide = -1;" << endl; 
 		assignFlag = true;
@@ -873,52 +876,52 @@ expression:
 				a = atoll($1);
 				int b_ind = findIndex($3);
 				b = regis_value[b_ind];
-				switch(b)
+				switch(a)
 				{
 				case 0:
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;				
 				case 1:
 					rozkazDoKolejki_expression(4, -2, b_ind);
 					break;
 				case 2:
 					rozkazDoKolejki_expression(4, -2, b_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				case 4:
 					rozkazDoKolejki_expression(4, -2, b_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				case 8:
 					rozkazDoKolejki_expression(4, -2, b_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				case 16:
 					rozkazDoKolejki_expression(4, -2, b_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				case 32:
 					rozkazDoKolejki_expression(4, -2, b_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				case 64:
 					rozkazDoKolejki_expression(4, -2, b_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				default:
 					mul_function(a, b);
@@ -933,49 +936,49 @@ expression:
 				switch(a)
 				{
 				case 0:
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;				
 				case 1:
 					rozkazDoKolejki_expression(4, -2, a_ind);
 					break;
 				case 2:
 					rozkazDoKolejki_expression(4, -2, a_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				case 4:
 					rozkazDoKolejki_expression(4, -2, a_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				case 8:
 					rozkazDoKolejki_expression(4, -2, a_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				case 16:
 					rozkazDoKolejki_expression(4, -2, a_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				case 32:
 					rozkazDoKolejki_expression(4, -2, a_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				case 64:
 					rozkazDoKolejki_expression(4, -2, a_ind);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
-					rozkazDoKolejki_expression(6, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
+					rozkazDoKolejki_expression(5, -2, -2);
 					break;
 				default:
 					mul_function(a, b);
@@ -1237,6 +1240,10 @@ condition:
 				cout << "vAv n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
+				if (a == b && a < 0){
+					regis_value[b_ind]--;
+					b = regis_value[b_ind];
+				}
 				cout << "vAv n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
 			}
 
@@ -1298,6 +1305,10 @@ condition:
 				cout << "v!=v n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
+				if (a == b && a < 0){
+					regis_value[b_ind]--;
+					b = regis_value[b_ind];
+				}
 				cout << "v!=v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
 				if (a_ind == b_ind){
 					//dupa
@@ -1362,6 +1373,10 @@ condition:
 				cout << "v>v n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
+				if (a == b && a < 0){
+					regis_value[b_ind]--;
+					b = regis_value[b_ind];
+				}
 				cout << "v>v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
 			}
 
@@ -1423,6 +1438,10 @@ condition:
 				cout << "v<v n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
+				if (a == b && a < 0){
+					regis_value[b_ind]--;
+					b = regis_value[b_ind];
+				}
 				cout << "v<v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
 			}
 
@@ -1484,6 +1503,10 @@ condition:
 				cout << "v<=v n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
+				if (a == b && a < 0){
+					regis_value[b_ind]--;
+					b = regis_value[b_ind];
+				}
 				cout << "v<=v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
 			}
 
@@ -1545,6 +1568,10 @@ condition:
 				cout << "v>=v n_i=11 -> $1 = " << $1 << ", $3 = " << $3 << ", findIndex($1) = " << findIndex($1) << ", findIndex($3) = " << findIndex($3) << endl; 
 				a = regis_value[a_ind];
 				b = regis_value[b_ind];
+				if (a == b && a < 0){
+					regis_value[b_ind]--;
+					b = regis_value[b_ind];
+				}
 				cout << "v>=v n_i=11 -> regis_value[a_ind] = " << regis_value[a_ind] << ", regis_value[b_ind] = " << regis_value[b_ind] << endl;
 			}
 
@@ -1910,6 +1937,30 @@ void createIdentifier(Identifier *s, string name, long long int isLocal,
 	s->tableEnd = 0;
     }
 }
+
+void createIterator(Identifier *s, string name, long long int isLocal,
+    long long int tableStart, long long int tableEnd, string type){
+    s->name = name;
+
+    s->type = type;
+  	
+    s->initialized = 1;
+    if(isLocal){
+    	s->local = 1;
+    }
+    else{
+    	s->local = 0;
+    }
+    if(tableEnd){
+	s->tableStart = tableStart;
+	s->tableEnd = tableEnd;
+    }
+    else{
+	s->tableStart = 0;
+	s->tableEnd = 0;
+    }
+}
+
 
 void insertIdentifier(string key, Identifier i){
 
@@ -2366,7 +2417,10 @@ void mul_function(long long int a, long long int b) { //TODO zrobić dla wartoś
 	else if ( num_ide == 81 ) {
 
 		cout << "mul_function PRZED (2) -> temp_ll = " << temp_ll << endl;
-		temp_ll = a * b;
+		if (b >= 0)		
+			temp_ll = a * b;
+		else
+			temp_ll = -81;
 		cout << "mul_function PO (2) -> temp_ll = " << temp_ll << endl;		
 
 	        if (a == 2){
@@ -2440,6 +2494,9 @@ void mul_function(long long int a, long long int b) { //TODO zrobić dla wartoś
 	else if ( num_ide == 10 ) {
 
 		cout << "mul_function PRZED (3) -> temp_ll = " << temp_ll << endl;
+		if (a < 0)
+		temp_ll = -10;
+		else		
 		temp_ll = a * b;
 		cout << "mul_function PO (3) -> temp_ll = " << temp_ll << endl;		
 
@@ -2513,7 +2570,10 @@ void mul_function(long long int a, long long int b) { //TODO zrobić dla wartoś
 	else if ( num_ide == 11 ) {
 
 		cout << "mul_function PRZED (4) -> temp_ll = " << temp_ll << endl;
+		if (a >= 0 && b >= 0)		
 		temp_ll = a * b;
+		else
+		temp_ll = -11;
 		cout << "mul_function PO (4) -> temp_ll = " << temp_ll << endl;		
 
 	        if (a == 2){
@@ -4535,6 +4595,7 @@ void rozkazDoKolejki_condition(int nr_rozkazu, int rX, int rY){
 	rozkazy_condition[rozkazy_index_condition][0] = nr_rozkazu;
 	rozkazy_condition[rozkazy_index_condition][1] = rX;
 	rozkazy_condition[rozkazy_index_condition][2] = rY;
+	cout << "rozkazy_condition[rozkazy_index_condition] -> " << rozkazy_condition[rozkazy_index_condition][0] << " " << rozkazy_condition[rozkazy_index_condition][1] << " " << rozkazy_condition[rozkazy_index_condition][2] << endl;	
 	rozkazy_index_condition++;
 }
 
@@ -4542,6 +4603,7 @@ void rozkazDoKolejki(int nr_rozkazu, int rX, int rY){
 	rozkazy[rozkazy_index][0] = nr_rozkazu;
 	rozkazy[rozkazy_index][1] = rX;
 	rozkazy[rozkazy_index][2] = rY;
+	cout << "rozkazy[rozkazy_index] -> " << rozkazy[rozkazy_index][0] << " " << rozkazy[rozkazy_index][1] << " " << rozkazy[rozkazy_index][2] << endl;	
 	rozkazy_index++;
 }
 
