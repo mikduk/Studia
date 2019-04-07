@@ -31,27 +31,27 @@ int main(int argc, const char * argv[]) {
             
             if (!strcmp(argv[3], "--asc")){
                 if (!strcmp(argv[2], "select")){
-                    Statystyki.operator=(selectSort(n, tablica, true, Statystyki, true));
+                    Statystyki.operator=(selectSort(n, tablica, true, Statystyki, true, true));
                     if (dobryPorzadek(n, tablica, true))
                         cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "insert")){
-                    Statystyki.operator=(insertSort(n, tablica, true, Statystyki, true));
+                    Statystyki.operator=(insertSort(n, tablica, true, Statystyki, true, true));
                     if (dobryPorzadek(n, tablica, true))
                         cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "heap")){
-                    Statystyki.operator=(heapSort(n, tablica, true, Statystyki, true));
+                    Statystyki.operator=(heapSort(n, tablica, true, Statystyki, true, true));
                     if (dobryPorzadek(n, tablica, true))
                         cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "quick")){
-                    Statystyki.operator=(quickSort(n, tablica, true, Statystyki, true));
+                    Statystyki.operator=(quickSort(n, tablica, true, Statystyki, true, true));
                     if (dobryPorzadek(n, tablica, true))
                         cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "mquick")){
-                    Statystyki.operator=(quickSortModyfikacja(n, tablica, true, Statystyki, true));
+                    Statystyki.operator=(quickSortModyfikacja(n, tablica, true, Statystyki, true, true));
                     if (dobryPorzadek(n, tablica, true))
                         cout << n << endl; pokazTablice(n, tablica);
                 }
@@ -61,27 +61,27 @@ int main(int argc, const char * argv[]) {
             }
             else if(!strcmp(argv[3], "--desc")){
                 if (!strcmp(argv[2], "select")){
-                    Statystyki.operator=(selectSort(n, tablica, false, Statystyki, true));
+                    Statystyki.operator=(selectSort(n, tablica, false, Statystyki, true, true));
                     if (dobryPorzadek(n, tablica, false))
                         cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "insert")){
-                    Statystyki.operator=(insertSort(n, tablica, false, Statystyki, true));
+                    Statystyki.operator=(insertSort(n, tablica, false, Statystyki, true, true));
                     if (dobryPorzadek(n, tablica, false))
                         cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "heap")){
-                    Statystyki.operator=(heapSort(n, tablica, false, Statystyki, true));
+                    Statystyki.operator=(heapSort(n, tablica, false, Statystyki, true, true));
                     if (dobryPorzadek(n, tablica, false))
                         cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "quick")){
-                    Statystyki.operator=(quickSort(n, tablica, false, Statystyki, true));
+                    Statystyki.operator=(quickSort(n, tablica, false, Statystyki, true, true));
                     if (dobryPorzadek(n, tablica, false))
                         cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "mquick")){
-                    Statystyki.operator=(quickSortModyfikacja(n, tablica, false, Statystyki, true));
+                    Statystyki.operator=(quickSortModyfikacja(n, tablica, false, Statystyki, true, true));
                     if (dobryPorzadek(n, tablica, false))
                         cout << n << endl; pokazTablice(n, tablica);
                 }
@@ -105,7 +105,7 @@ int main(int argc, const char * argv[]) {
 			tablica[i] = ((rand()*20000) % 20000) - 10000;
 		}
 		
-		for (int i = 100; i <= 1000; i += 100){
+		for (int i = 100; i <= 200; i += 100){
 			int porownania = 0;
 			int przestawienia = 0;
 			unsigned long int czas = 0;
@@ -116,7 +116,7 @@ int main(int argc, const char * argv[]) {
                 		kopia_tablicy[u] = tablica[u];
 			for (int j = 0; j < k; j++){
 				statystyki x;
-				x.operator=(insertSort(i, kopia_tablicy, true, x, false));
+				x.operator=(insertSort(i, kopia_tablicy, true, x, false, false));
 				porownania += x.porownania;
 				przestawienia += x.przestawienia;
 				czas += x.czas;
