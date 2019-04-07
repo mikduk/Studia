@@ -12,14 +12,14 @@
 #include "funkcjePomocnicze.h"
 
 // funkcje z pliku QuickSort.cpp
-statystyki quickSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie);
-statystyki quickSortAlgorytm(int n, int * tablica, bool asc, statystyki Statystyki);
+statystyki quickSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz);
+statystyki quickSortAlgorytm(int n, int * tablica, bool asc, statystyki Statystyki, bool pokaz);
 void quickSortCzasAsc(int n, int * tablica);
 void quickSortCzasDesc(int n, int * tablica);
 
 // funkcje z pliku QuickSortModyfikacja.cpp
-statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie);
-statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statystyki Statystyki);
+statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz);
+statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statystyki Statystyki, bool pokaz);
 void quickSortModyfikacjaCzasAsc(int n, int * tablica);
 void quickSortModyfikacjaCzasDesc(int n, int * tablica);
 
