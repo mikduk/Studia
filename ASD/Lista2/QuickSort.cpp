@@ -17,7 +17,7 @@
 
 using namespace std;
 
-statystyki quickSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie){
+statystyki quickSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz){
     
     // zmienne zliczające kolejno: porównania, przestawienia, czas rozpoczęcia, czas zakończenia
     Statystyki.porownania = 0;
@@ -43,7 +43,7 @@ statystyki quickSort(int n, int * tablica, bool asc, statystyki Statystyki, bool
     
     // właściwa część algorytmu
     startP = clock();
-    Statystyki.operator=(quickSortAlgorytm(n, tablica, asc, Statystyki));
+    Statystyki.operator=(quickSortAlgorytm(n, tablica, asc, Statystyki, pokaz));
     stopP = clock();
     
     Statystyki.czas = stop - start;
@@ -55,7 +55,7 @@ statystyki quickSort(int n, int * tablica, bool asc, statystyki Statystyki, bool
     return Statystyki;
 }
 
-statystyki quickSortAlgorytm(int n, int * tablica, bool asc, statystyki Statystyki){
+statystyki quickSortAlgorytm(int n, int * tablica, bool asc, statystyki Statystyki, bool pokaz){
     
     // deklaracja pivota (środek nieposortowanej tablicy) oraz części do podziału (wersje asc i desc)
     int pivot = tablica[n/2];
@@ -65,18 +65,18 @@ statystyki quickSortAlgorytm(int n, int * tablica, bool asc, statystyki Statysty
     
     // podział na trzy tablice względem pivota
     for (int i=0; i<n; i++){
-        Statystyki.porownania = porownanie(Statystyki.porownania, tablica[i], pivot, 'z');
+        Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, tablica[i], pivot, 'z');
         if (tablica[i] < pivot) {
             mniejsze.push(tablica[i]);
-            Statystyki.przestawienia = przestawienie(Statystyki.przestawienia, tablica[i], "do mniejszych od pivota");
+            Statystyki.przestawienia = przestawienie(pokaz, Statystyki.przestawienia, tablica[i], "do mniejszych od pivota");
         }
         else if (tablica[i] == pivot) {
             rowne.push(tablica[i]);
-            Statystyki.przestawienia = przestawienie(Statystyki.przestawienia, tablica[i], "do równych pivotowi");
+            Statystyki.przestawienia = przestawienie(pokaz, Statystyki.przestawienia, tablica[i], "do równych pivotowi");
         }
         else {
             wieksze.push(tablica[i]);
-            Statystyki.przestawienia = przestawienie(Statystyki.przestawienia, tablica[i], "do większych od pivota");
+            Statystyki.przestawienia = przestawienie(pokaz, Statystyki.przestawienia, tablica[i], "do większych od pivota");
         }
     }
     
@@ -88,7 +88,7 @@ statystyki quickSortAlgorytm(int n, int * tablica, bool asc, statystyki Statysty
             tabMniejsze[i] = mniejsze.front();
             mniejsze.pop();
         }
-        Statystyki.operator=(quickSortAlgorytm(size, tabMniejsze, asc, Statystyki));
+        Statystyki.operator=(quickSortAlgorytm(size, tabMniejsze, asc, Statystyki, pokaz));
         for (int i=0; i<size; i++){
             mniejsze.push(tabMniejsze[i]);
         }
@@ -102,7 +102,7 @@ statystyki quickSortAlgorytm(int n, int * tablica, bool asc, statystyki Statysty
             tabWieksze[i] = wieksze.front();
             wieksze.pop();
         }
-        Statystyki.operator=(quickSortAlgorytm(size, tabWieksze, asc, Statystyki));
+        Statystyki.operator=(quickSortAlgorytm(size, tabWieksze, asc, Statystyki, pokaz));
         for (int i=0; i<size; i++){
             wieksze.push(tabWieksze[i]);
         }
