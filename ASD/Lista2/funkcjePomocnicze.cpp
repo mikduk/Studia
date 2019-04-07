@@ -46,12 +46,10 @@ void wstawIPrzesun(int wart, int pozycja, int n, int * tablica){
 }
 
 int wstawIPrzestaw(bool pokaz, int wart, int pozycja, int n, int * tablica, int przestawienia){
-    for (int i = n-1; i >= pozycja; i--){
-        //if (pokaz)
-        //przestawienia = przestawienie(przestawienia, tablica[i+1], tablica[i]);
+    for (int i = n-2; i >= pozycja; i--){
+        //przestawienia = przestawienie(pokaz, przestawienia, tablica[i+1], tablica[i]); /*wątpliwość, czy to liczyć*/
         tablica[i+1] = tablica[i];
     }
-    if (pokaz)
     przestawienia = przestawienie(pokaz, przestawienia, wart, tablica[pozycja]);
     tablica[pozycja] = wart;
     return przestawienia;

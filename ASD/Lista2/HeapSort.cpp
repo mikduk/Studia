@@ -79,14 +79,14 @@ statystyki heapSort(int n, int * tablica, bool asc, statystyki Statystyki, bool 
 statystyki buildMaxHeap(int n, int * tablica, statystyki Statystyki, bool pokaz){
     int rozmiarKopca = n;
     for (int i = (n/2)-1; i >= 0; i--)
-        Statystyki.operator=(pokaz, maxHeapify(tablica, i, rozmiarKopca, Statystyki));
+        Statystyki.operator=(maxHeapify(tablica, i, rozmiarKopca, Statystyki, pokaz));
     return Statystyki;
 }
 
 statystyki buildMinHeap(int n, int * tablica, statystyki Statystyki, bool pokaz){
     int rozmiarKopca = n;
     for (int i = (n/2)-1; i >= 0; i--)
-        Statystyki.operator=(pokaz, minHeapify(tablica, i, rozmiarKopca, Statystyki));
+        Statystyki.operator=(minHeapify(tablica, i, rozmiarKopca, Statystyki, pokaz));
     return Statystyki;
 }
 
