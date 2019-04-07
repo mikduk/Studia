@@ -17,7 +17,7 @@
 
 using namespace std;
 
-statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie){
+statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz){
     
     // zmienne zliczające kolejno: czas rozpoczęcia, czas zakończenia
     clock_t start, stop, startP, stopP;
@@ -41,7 +41,7 @@ statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Staty
     
     // właściwa część algorytmu
     startP = clock();
-    Statystyki.operator=(quickSortModyfikacjaAlgorytm(n, tablica, asc, Statystyki));
+    Statystyki.operator=(quickSortModyfikacjaAlgorytm(n, tablica, asc, Statystyki, pokaz));
     stopP = clock();
     
     Statystyki.czas = stop - start;
@@ -53,14 +53,14 @@ statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Staty
     return Statystyki;
 }
 
-statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statystyki Statystyki){
+statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statystyki Statystyki, bool pokaz){
     
     if (n > 16){
         
         // deklaracja pivota (mediana z pierwszego, środkowego i ostatniego elementu tablicy)
         int pivot;
         int potencjalnePivoty[3] = {tablica[0], tablica[n/2], tablica[n-1]};
-        Statystyki.operator=(insertSort(3, potencjalnePivoty, true, Statystyki, false));
+        Statystyki.operator=(insertSort(3, potencjalnePivoty, true, Statystyki, false, pokaz));
         pivot = potencjalnePivoty[1];
         
         // deklaracja części do dzielenia tablicy
@@ -70,18 +70,18 @@ statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statysty
     
         // podział na trzy tablice względem pivota
         for (int i=0; i<n; i++){
-            Statystyki.porownania = porownanie(Statystyki.porownania, tablica[i], pivot, 'z');
+            Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, tablica[i], pivot, 'z');
             if (tablica[i] < pivot) {
                 mniejsze.push(tablica[i]);
-                Statystyki.przestawienia = przestawienie(Statystyki.przestawienia, tablica[i], "do mniejszych od pivota");
+                Statystyki.przestawienia = przestawienie(pokaz, Statystyki.przestawienia, tablica[i], "do mniejszych od pivota");
             }
             else if (tablica[i] == pivot) {
                 rowne.push(tablica[i]);
-                Statystyki.przestawienia = przestawienie(Statystyki.przestawienia, tablica[i], "do równych pivotowi");
+                Statystyki.przestawienia = przestawienie(pokaz, Statystyki.przestawienia, tablica[i], "do równych pivotowi");
             }
             else {
                 wieksze.push(tablica[i]);
-                Statystyki.przestawienia = przestawienie(Statystyki.przestawienia, tablica[i], "do większych od pivota");
+                Statystyki.przestawienia = przestawienie(pokaz, Statystyki.przestawienia, tablica[i], "do większych od pivota");
             }
         }
         
@@ -93,7 +93,7 @@ statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statysty
                 tabMniejsze[i] = mniejsze.front();
                 mniejsze.pop();
             }
-            Statystyki.operator=(quickSortModyfikacjaAlgorytm(size, tabMniejsze, asc, Statystyki));
+            Statystyki.operator=(quickSortModyfikacjaAlgorytm(size, tabMniejsze, asc, Statystyki, pokaz));
             for (int i=0; i<size; i++){
                 mniejsze.push(tabMniejsze[i]);
             }
@@ -107,7 +107,7 @@ statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statysty
                 tabWieksze[i] = wieksze.front();
                 wieksze.pop();
             }
-            Statystyki.operator=(quickSortModyfikacjaAlgorytm(size, tabWieksze, asc, Statystyki));
+            Statystyki.operator=(quickSortModyfikacjaAlgorytm(size, tabWieksze, asc, Statystyki, pokaz));
             for (int i=0; i<size; i++){
                 wieksze.push(tabWieksze[i]);
             }
@@ -158,7 +158,7 @@ statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statysty
     }
     
     else{
-        Statystyki.operator=(insertSort(n, tablica, asc, Statystyki, false));
+        Statystyki.operator=(insertSort(n, tablica, asc, Statystyki, false, pokaz));
     }
     
     return Statystyki;
@@ -322,4 +322,3 @@ void quickSortModyfikacjaCzasDesc(int n, int * tablica){
         insertSortCzasAsc(n, tablica, kopia_tablicy_czas);
     }
 }
-
