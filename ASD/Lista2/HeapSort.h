@@ -17,12 +17,12 @@ int lewySyn(int i);
 int prawySyn(int i);
 
 // pomocnicze funkcje potrzebne do wersji asc
-statystyki maxHeapify(int * tablica, int i, int rozmiarKopca, statystyki Statystyki);
-statystyki minHeapify(int * tablica, int i, int rozmiarKopca, statystyki Statystyki);
+statystyki maxHeapify(int * tablica, int i, int rozmiarKopca, statystyki Statystyki, bool pokaz);
+statystyki minHeapify(int * tablica, int i, int rozmiarKopca, statystyki Statystyki, bool pokaz);
 
 // pomocnicze funkcje potrzebne do wersji desc
-statystyki buildMaxHeap(int n, int * tablica, statystyki Statystyki);
-statystyki buildMinHeap(int n, int * tablica, statystyki Statystyki);
+statystyki buildMaxHeap(int n, int * tablica, statystyki Statystyki, bool pokaz);
+statystyki buildMinHeap(int n, int * tablica, statystyki Statystyki, bool pokaz);
 
 // pomocnicze funkcje potrzebne do zmierzenia czasu
 void maxHeapifyCzas(int * tablica, int i, int rozmiarKopca);
@@ -31,6 +31,6 @@ void buildMaxHeapCzas(int n, int * tablica);
 void buildMinHeapCzas(int n, int * tablica);
 
 // algorytm
-statystyki heapSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie);
+statystyki heapSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz);
 
 #endif /* HeapSort_h */
