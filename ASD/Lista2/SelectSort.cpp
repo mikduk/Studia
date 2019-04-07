@@ -14,7 +14,7 @@
 
 using namespace std;
 
-statystyki selectSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie){
+statystyki selectSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz){
     
     // zmienne zliczające kolejno: porównania, przestawienia, czas rozpoczęcia, czas zakończenia
     int porownania = Statystyki.porownania, przestawienia = Statystyki.przestawienia;
@@ -103,13 +103,17 @@ statystyki selectSort(int n, int * tablica, bool asc, statystyki Statystyki, boo
         
         for (int j=i+1; j<=k; j++){
             
-            cerr << "(" << ++porownania << ") Porównuję: min(" << min << ") > " << tablica[j] << endl;
+            porownania++;
+            if (pokaz)
+            cerr << "(" << porownania << ") Porównuję: min(" << min << ") > " << tablica[j] << endl;
             if (min > tablica[j]){
                 min = tablica[j];
                 min_index = j;
             }
             
-            cerr << "(" << ++porownania << ") Porównuję: max(" << max << ") < " << tablica[j] << endl;
+            porownania++;
+            if (pokaz)
+            cerr << "(" << porownania << ") Porównuję: max(" << max << ") < " << tablica[j] << endl;
             if (max < tablica[j]){
                 max = tablica[j];
                 max_index = j;
@@ -117,19 +121,27 @@ statystyki selectSort(int n, int * tablica, bool asc, statystyki Statystyki, boo
         }
         
         if (asc){
-            cerr << "(" << ++przestawienia << ") Przestawiam: " << tablica[i] << " z min(" << min << ")\n";
+            przestawienia++;
+            if (pokaz)
+            cerr << "(" << przestawienia << ") Przestawiam: " << tablica[i] << " z min(" << min << ")\n";
             tablica[i] = min;
             tablica[min_index] = temp;
             
-            cerr << "(" << ++przestawienia << ") Przestawiam: " << tablica[k] << " z max(" << max << ")\n";
+            przestawienia++;
+            if (pokaz)
+            cerr << "(" << przestawienia << ") Przestawiam: " << tablica[k] << " z max(" << max << ")\n";
             tablica[k] = max;
             tablica[max_index] = temp2;
         }
         else{
-            cerr << "(" << ++przestawienia << ") Przestawiam: " << tablica[i] << " z max(" << max << ")\n";
+            przestawienia++;
+            if (pokaz)
+            cerr << "(" << przestawienia << ") Przestawiam: " << tablica[i] << " z max(" << max << ")\n";
             tablica[i] = max;
             tablica[min_index] = temp2;
-            cerr << "(" << ++przestawienia << ") Przestawiam: " << tablica[k] << " z min(" << min << ")\n";
+            przestawienia++;
+            if (pokaz)
+            cerr << "(" << przestawienia << ") Przestawiam: " << tablica[k] << " z min(" << min << ")\n";
             tablica[k] = min;
             tablica[max_index] = temp;
         }

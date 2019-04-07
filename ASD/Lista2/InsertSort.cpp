@@ -15,7 +15,7 @@
 
 using namespace std;
 
-statystyki insertSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie){
+statystyki insertSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz){
     
     // kopiowanie tablicy
     int * kopia_tablicy = new int[n];
@@ -47,30 +47,30 @@ statystyki insertSort(int n, int * tablica, bool asc, statystyki Statystyki, boo
         for (int i = 1; i < n; i++){
             bool maximum = true;
             for (int j = 0; j < i; j++){
-                porownania = porownanie(porownania, tablica[i], kopia_tablicy[j], '<');
+                porownania = porownanie(pokaz, porownania, tablica[i], kopia_tablicy[j], '<');
                 if (tablica[i] < kopia_tablicy[j]){
-                    przestawienia = wstawIPrzestaw(tablica[i], j, n, kopia_tablicy, przestawienia);
+                    przestawienia = wstawIPrzestaw(pokaz, tablica[i], j, n, kopia_tablicy, przestawienia);
                     maximum = false;
                     break;
                 }
             }
             if (maximum)
-                przestawienia = wstawIPrzestaw(tablica[i], i, n, kopia_tablicy, przestawienia);
+                przestawienia = wstawIPrzestaw(pokaz, tablica[i], i, n, kopia_tablicy, przestawienia);
         }
     }
     else{
         for (int i = 1; i < n; i++){
             bool maximum = true;
             for (int j = 0; j < i; j++){
-                porownania = porownanie(porownania, tablica[i], kopia_tablicy[j], '>');
+                porownania = porownanie(pokaz, porownania, tablica[i], kopia_tablicy[j], '>');
                 if (tablica[i] > kopia_tablicy[j]){
-                    przestawienia = wstawIPrzestaw(tablica[i], j, n, kopia_tablicy, przestawienia);
+                    przestawienia = wstawIPrzestaw(pokaz, tablica[i], j, n, kopia_tablicy, przestawienia);
                     maximum = false;
                     break;
                 }
             }
             if (maximum)
-                przestawienia = wstawIPrzestaw(tablica[i], i, n, kopia_tablicy, przestawienia);
+                przestawienia = wstawIPrzestaw(pokaz, tablica[i], i, n, kopia_tablicy, przestawienia);
         }
     }
     

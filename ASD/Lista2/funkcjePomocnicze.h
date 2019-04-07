@@ -19,7 +19,6 @@ typedef struct statystyki{
 }Statystyki;
 
 void pokazTablice(int n, int tablica[]);
-bool dobryPorzadek(int n, int * tablica, bool asc);
 void zamien (int a, int b, int * tablica);
 void wstawIPrzesun(int wart, int pozycja, int n, int * tablica);
 int wstawIPrzestaw(int wart, int pozycja, int n, int * tablica, int przestawienia);

@@ -13,10 +13,10 @@
 #include "QuickSort.h"
 #include "HeapSort.h"
 
-statystyki selectSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie);
-statystyki insertSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie);
-statystyki quickSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie);
-statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie);
-statystyki heapSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie);
+statystyki selectSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz);
+statystyki insertSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz);
+statystyki quickSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz);
+statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz);
+statystyki heapSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz);
 
 #endif /* algorytmy_h */
