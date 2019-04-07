@@ -18,6 +18,21 @@ void pokazTablice(int n, int tablica[]){
     cout << endl;
 }
 
+bool dobryPorzadek(int n, int * tablica, bool asc){
+    bool ok = true;
+    if (asc){
+    	for (int i = 1; i < n; i++)
+	    if (tablica[i-1] > tablica[i])
+	        ok = false;
+    }
+    else{
+    	for (int i = 1; i < n; i++)
+	    if (tablica[i-1] < tablica[i])
+	        ok = false;
+    }
+    return ok;			
+}
+
 void zamien (int a, int b, int * tablica){
     int temp = tablica[a];
     tablica[a] = tablica[b];

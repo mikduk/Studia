@@ -9,6 +9,7 @@
 #include "algorytmy.h"
 #include <iostream>
 #include <string.h>
+#include <fstream>
 
 using namespace std;
 
@@ -94,6 +95,20 @@ int main(int argc, const char * argv[]) {
         }
         else if(!strcmp(argv[1], "--stat")){
             int k; cin >> k;
+		fstream fout;
+		string nazwaAlgorytmu;
+		fout.open(argv[2], ios::out);
+		fout << nazwaAlgorytmu << endl;
+		for (int i = 100; i <= 10000; i += 100){
+			int porownania = 0;
+			int przestawienia = 0;
+			unsigned long int czas = 0;
+			unsigned long int czasPraktyczny = 0;
+			for (int j = 0; j < k; j++){
+				//statystyki x.operator=(insertSort(n, ))			
+			}
+		}
+		fout.close();	
         }
         else{
             cout << "podano zły pierwszy parametr";
