@@ -94,19 +94,35 @@ int main(int argc, const char * argv[]) {
             }
         }
         else if(!strcmp(argv[1], "--stat")){
-            int k; cin >> k;
+            	int k = atoi(argv[3]);
 		fstream fout;
 		string nazwaAlgorytmu;
 		fout.open(argv[2], ios::out);
+		nazwaAlgorytmu = "insertSort";
 		fout << nazwaAlgorytmu << endl;
-		for (int i = 100; i <= 10000; i += 100){
+		int tablica[10000];
+		for (int i = 0; i < 10000; i++){
+			tablica[i] = ((rand()*20000) % 20000) - 10000;
+		}
+		
+		for (int i = 100; i <= 1000; i += 100){
 			int porownania = 0;
 			int przestawienia = 0;
 			unsigned long int czas = 0;
 			unsigned long int czasPraktyczny = 0;
+
+			int * kopia_tablicy = new int[i];
+	            	for (int u = 0; u < i; u++)
+                		kopia_tablicy[u] = tablica[u];
 			for (int j = 0; j < k; j++){
-				//statystyki x.operator=(insertSort(n, ))			
+				statystyki x;
+				x.operator=(insertSort(i, kopia_tablicy, true, x, false));
+				porownania += x.porownania;
+				przestawienia += x.przestawienia;
+				czas += x.czas;
+				czasPraktyczny += x.czasPraktyczny;				
 			}
+			fout << "i = " << i << " | porownania = " << porownania/k << " | przestawienia = " << przestawienia/k << " | czas teoretyczny = " << czas/k << " ms | czas praktyczny = " << czasPraktyczny/k << " ms" << endl; 
 		}
 		fout.close();	
         }
