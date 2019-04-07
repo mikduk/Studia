@@ -11,7 +11,7 @@
 
 #include "funkcjePomocnicze.h"
 
-statystyki insertSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie);
+statystyki insertSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz);
 void insertSortCzasAsc(int n, int * tablica, int * kopia_tablicy_czas);
 void insertSortCzasDesc(int n, int * tablica, int * kopia_tablicy_czas);
 
