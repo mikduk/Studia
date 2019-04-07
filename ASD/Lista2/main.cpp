@@ -13,7 +13,7 @@
 using namespace std;
 
 int main(int argc, const char * argv[]) {
-
+    
     if (argc == 4){
         if (!strcmp(argv[1], "--type")){
             
@@ -31,48 +31,58 @@ int main(int argc, const char * argv[]) {
             if (!strcmp(argv[3], "--asc")){
                 if (!strcmp(argv[2], "select")){
                     Statystyki.operator=(selectSort(n, tablica, true, Statystyki, true));
-			cout << n << endl; pokazTablice(n, tablica);
+                    if (dobryPorzadek(n, tablica, true))
+                        cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "insert")){
                     Statystyki.operator=(insertSort(n, tablica, true, Statystyki, true));
-			cout << n << endl; pokazTablice(n, tablica);
+                    if (dobryPorzadek(n, tablica, true))
+                        cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "heap")){
                     Statystyki.operator=(heapSort(n, tablica, true, Statystyki, true));
-			cout << n << endl; pokazTablice(n, tablica);
+                    if (dobryPorzadek(n, tablica, true))
+                        cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "quick")){
                     Statystyki.operator=(quickSort(n, tablica, true, Statystyki, true));
-			cout << n << endl; pokazTablice(n, tablica);
+                    if (dobryPorzadek(n, tablica, true))
+                        cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "mquick")){
                     Statystyki.operator=(quickSortModyfikacja(n, tablica, true, Statystyki, true));
-			cout << n << endl; pokazTablice(n, tablica);
+                    if (dobryPorzadek(n, tablica, true))
+                        cout << n << endl; pokazTablice(n, tablica);
                 }
                 else{
-                   cout << "podano zły drugi parametr\n";
+                    cout << "podano zły drugi parametr\n";
                 }
             }
             else if(!strcmp(argv[3], "--desc")){
                 if (!strcmp(argv[2], "select")){
                     Statystyki.operator=(selectSort(n, tablica, false, Statystyki, true));
-			cout << n << endl; pokazTablice(n, tablica);
+                    if (dobryPorzadek(n, tablica, false))
+                        cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "insert")){
                     Statystyki.operator=(insertSort(n, tablica, false, Statystyki, true));
-			cout << n << endl; pokazTablice(n, tablica);
+                    if (dobryPorzadek(n, tablica, false))
+                        cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "heap")){
                     Statystyki.operator=(heapSort(n, tablica, false, Statystyki, true));
-			cout << n << endl; pokazTablice(n, tablica);
+                    if (dobryPorzadek(n, tablica, false))
+                        cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "quick")){
                     Statystyki.operator=(quickSort(n, tablica, false, Statystyki, true));
-			cout << n << endl; pokazTablice(n, tablica);
+                    if (dobryPorzadek(n, tablica, false))
+                        cout << n << endl; pokazTablice(n, tablica);
                 }
                 else if(!strcmp(argv[2], "mquick")){
                     Statystyki.operator=(quickSortModyfikacja(n, tablica, false, Statystyki, true));
-			cout << n << endl; pokazTablice(n, tablica);
+                    if (dobryPorzadek(n, tablica, false))
+                        cout << n << endl; pokazTablice(n, tablica);
                 }
                 else{
                     cout << "podano zły drugi parametr\n";
@@ -83,7 +93,7 @@ int main(int argc, const char * argv[]) {
             }
         }
         else if(!strcmp(argv[1], "--stat")){
-            int k; cin >> k;		
+            int k; cin >> k;
         }
         else{
             cout << "podano zły pierwszy parametr";
