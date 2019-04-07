@@ -18,6 +18,21 @@ void pokazTablice(int n, int tablica[]){
     cout << endl;
 }
 
+bool dobryPorzadek(int n, int * tablica, bool asc){
+    bool ok = true;
+    if (asc){
+        for (int i = 1; i < n; i++)
+            if (tablica[i-1] > tablica[i])
+                ok = false;
+    }
+    else {
+        for (int i = 1; i < n; i++)
+            if (tablica[i-1] < tablica[i])
+                ok = false;
+    }
+    return ok;
+}
+
 void zamien (int a, int b, int * tablica){
     int temp = tablica[a];
     tablica[a] = tablica[b];
@@ -30,33 +45,42 @@ void wstawIPrzesun(int wart, int pozycja, int n, int * tablica){
     tablica[pozycja] = wart;
 }
 
-int wstawIPrzestaw(int wart, int pozycja, int n, int * tablica, int przestawienia){
+int wstawIPrzestaw(bool pokaz, int wart, int pozycja, int n, int * tablica, int przestawienia){
     for (int i = n-1; i >= pozycja; i--){
+        //if (pokaz)
         //przestawienia = przestawienie(przestawienia, tablica[i+1], tablica[i]);
         tablica[i+1] = tablica[i];
     }
-    przestawienia = przestawienie(przestawienia, wart, tablica[pozycja]);
+    if (pokaz)
+    przestawienia = przestawienie(pokaz, przestawienia, wart, tablica[pozycja]);
     tablica[pozycja] = wart;
     return przestawienia;
 }
 
-int porownanie(int porownania, int a, int b, char znak){
-    cerr << "(" << ++porownania << ") Porównuję: " << a << " " << znak << " " << b << endl;
+int porownanie(bool pokaz, int porownania, int a, int b, char znak){
+    porownania++;
+    if (pokaz)
+    cerr << "(" << porownania << ") Porównuję: " << a << " " << znak << " " << b << endl;
     return porownania;
 }
 
-int porownanie(int porownania, int a, int b, char znak, string reszta){
-    cerr << "(" << ++porownania << ") Porównuję: " << a << " " << znak << " " << b << " (" << reszta << ")" << endl;
+int porownanie(bool pokaz, int porownania, int a, int b, char znak, string reszta){
+    porownania++;
+    if (pokaz)
+    cerr << "(" << porownania << ") Porównuję: " << a << " " << znak << " " << b << " (" << reszta << ")" << endl;
     return porownania;
 }
 
-int przestawienie(int przestawienia, int a, int b){
-    cerr << "(" << ++przestawienia << ") Przestawiam: " << a << " z " << b << "\n";
+int przestawienie(bool pokaz, int przestawienia, int a, int b){
+    przestawienia++;
+    if (pokaz)
+    cerr << "(" << przestawienia << ") Przestawiam: " << a << " z " << b << "\n";
     return przestawienia;
 }
 
-int przestawienie(int przestawienia, int a, string b){
-    cerr << "(" << ++przestawienia << ") Przestawiam: " << a << " " << b << "\n";
+int przestawienie(bool pokaz, int przestawienia, int a, string b){
+    przestawienia++;
+    if (pokaz)
+    cerr << "(" << przestawienia << ") Przestawiam: " << a << " " << b << "\n";
     return przestawienia;
 }
-
