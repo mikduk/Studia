@@ -13,7 +13,7 @@
 #include <ctime>
 #include <iostream>
 
-statystyki heapSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie){
+statystyki heapSort(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz){
     // zmienne zliczające kolejno: porównania, przestawienia, czas rozpoczęcia, czas zakończenia
     Statystyki.porownania = 0;
     Statystyki.przestawienia = 0;
@@ -48,21 +48,21 @@ statystyki heapSort(int n, int * tablica, bool asc, statystyki Statystyki, bool 
     // właściwa część algorytmu
     if (asc){
         startP = clock();
-        Statystyki.operator=(buildMaxHeap(n, tablica, Statystyki));
+        Statystyki.operator=(buildMaxHeap(n, tablica, Statystyki, pokaz));
         for (int i = (n-1); i > 0; i--){
-            Statystyki.przestawienia = przestawienie(Statystyki.przestawienia, tablica[i], "na początek tablicy");
+            Statystyki.przestawienia = przestawienie(pokaz, Statystyki.przestawienia, tablica[i], "na początek tablicy");
             zamien(0, i, tablica);
-            Statystyki.operator=(maxHeapify(tablica, 0, --n, Statystyki));
+            Statystyki.operator=(maxHeapify(tablica, 0, --n, Statystyki, pokaz));
         }
         stopP = clock();
     }
     else{
         startP = clock();
-        Statystyki.operator=(buildMinHeap(n, tablica, Statystyki));
+        Statystyki.operator=(buildMinHeap(n, tablica, Statystyki, pokaz));
         for (int i = (n-1); i > 0; i--){
-            Statystyki.przestawienia = przestawienie(Statystyki.przestawienia, tablica[i], "na początek tablicy");
+            Statystyki.przestawienia = przestawienie(pokaz, Statystyki.przestawienia, tablica[i], "na początek tablicy");
             zamien(0, i, tablica);
-            Statystyki.operator=(minHeapify(tablica, 0, --n, Statystyki));
+            Statystyki.operator=(minHeapify(tablica, 0, --n, Statystyki, pokaz));
         }
         stopP = clock();
     }
@@ -76,73 +76,73 @@ statystyki heapSort(int n, int * tablica, bool asc, statystyki Statystyki, bool 
     return Statystyki;
 }
 
-statystyki buildMaxHeap(int n, int * tablica, statystyki Statystyki){
+statystyki buildMaxHeap(int n, int * tablica, statystyki Statystyki, bool pokaz){
     int rozmiarKopca = n;
     for (int i = (n/2)-1; i >= 0; i--)
-        Statystyki.operator=(maxHeapify(tablica, i, rozmiarKopca, Statystyki));
+        Statystyki.operator=(pokaz, maxHeapify(tablica, i, rozmiarKopca, Statystyki));
     return Statystyki;
 }
 
-statystyki buildMinHeap(int n, int * tablica, statystyki Statystyki){
+statystyki buildMinHeap(int n, int * tablica, statystyki Statystyki, bool pokaz){
     int rozmiarKopca = n;
     for (int i = (n/2)-1; i >= 0; i--)
-        Statystyki.operator=(minHeapify(tablica, i, rozmiarKopca, Statystyki));
+        Statystyki.operator=(pokaz, minHeapify(tablica, i, rozmiarKopca, Statystyki));
     return Statystyki;
 }
 
-statystyki maxHeapify(int * tablica, int i, int rozmiarKopca, statystyki Statystyki){
+statystyki maxHeapify(int * tablica, int i, int rozmiarKopca, statystyki Statystyki, bool pokaz){
     int l = lewySyn(i);
     int p = prawySyn(i);
     int najwiekszy = i;
     
-    Statystyki.porownania = porownanie(Statystyki.porownania, l, rozmiarKopca, '>', "rozmiar kopca");
+    Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, l, rozmiarKopca, '>', "rozmiar kopca");
     if (l < rozmiarKopca){
-        Statystyki.porownania = porownanie(Statystyki.porownania, tablica[l], tablica[i], '>');
+        Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, tablica[l], tablica[i], '>');
         if (tablica[l] > tablica[i])
             najwiekszy = l;
     }
     
-    Statystyki.porownania = porownanie(Statystyki.porownania, p, rozmiarKopca, '>', "rozmiar kopca");
+    Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, p, rozmiarKopca, '>', "rozmiar kopca");
     if (p < rozmiarKopca){
-        Statystyki.porownania = porownanie(Statystyki.porownania, tablica[p], tablica[najwiekszy], '>');
+        Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, tablica[p], tablica[najwiekszy], '>');
         if (tablica[p] > tablica[najwiekszy])
             najwiekszy = p;
     }
     
-    Statystyki.porownania = porownanie(Statystyki.porownania, najwiekszy, i, '=', "czy ojciec był największy");
+    Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, najwiekszy, i, '=', "czy ojciec był największy");
     if (najwiekszy != i){
-        Statystyki.przestawienia = przestawienie(Statystyki.przestawienia, tablica[i], tablica[najwiekszy]);
+        Statystyki.przestawienia = przestawienie(pokaz, Statystyki.przestawienia, tablica[i], tablica[najwiekszy]);
         zamien(i, najwiekszy, tablica);
-        Statystyki.operator=(maxHeapify(tablica, najwiekszy, rozmiarKopca, Statystyki));
+        Statystyki.operator=(maxHeapify(tablica, najwiekszy, rozmiarKopca, Statystyki, pokaz));
     }
     
     return Statystyki;
 }
 
-statystyki minHeapify(int * tablica, int i, int rozmiarKopca, statystyki Statystyki){
+statystyki minHeapify(int * tablica, int i, int rozmiarKopca, statystyki Statystyki, bool pokaz){
     int l = lewySyn(i);
     int p = prawySyn(i);
     int najmniejszy = i;
     
-    Statystyki.porownania = porownanie(Statystyki.porownania, l, rozmiarKopca, '>', "rozmiar kopca");
+    Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, l, rozmiarKopca, '>', "rozmiar kopca");
     if (l < rozmiarKopca){
-        Statystyki.porownania = porownanie(Statystyki.porownania, tablica[l], tablica[i], '<');
+        Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, tablica[l], tablica[i], '<');
         if (tablica[l] < tablica[i])
             najmniejszy = l;
     }
     
-    Statystyki.porownania = porownanie(Statystyki.porownania, p, rozmiarKopca, '>', "rozmiar kopca");
+    Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, p, rozmiarKopca, '>', "rozmiar kopca");
     if (p < rozmiarKopca){
-        Statystyki.porownania = porownanie(Statystyki.porownania, tablica[p], tablica[najmniejszy], '<');
+        Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, tablica[p], tablica[najmniejszy], '<');
         if (tablica[p] < tablica[najmniejszy])
             najmniejszy = p;
     }
     
-    Statystyki.porownania = porownanie(Statystyki.porownania, najmniejszy, i, '=', "czy ojciec był najmniejszy");
+    Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, najmniejszy, i, '=', "czy ojciec był najmniejszy");
     if (najmniejszy != i){
-        Statystyki.przestawienia = przestawienie(Statystyki.przestawienia, tablica[i], tablica[najmniejszy]);
+        Statystyki.przestawienia = przestawienie(pokaz, Statystyki.przestawienia, tablica[i], tablica[najmniejszy]);
         zamien(i, najmniejszy, tablica);
-        Statystyki.operator=(minHeapify(tablica, najmniejszy, rozmiarKopca, Statystyki));
+        Statystyki.operator=(minHeapify(tablica, najmniejszy, rozmiarKopca, Statystyki, pokaz));
     }
     
     return Statystyki;
