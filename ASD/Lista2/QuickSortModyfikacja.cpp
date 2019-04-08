@@ -17,8 +17,8 @@
 
 using namespace std;
 
-statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz){
-    
+statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Statystyki, bool podsumowanie, bool pokaz){ 
+
     // zmienne zliczające kolejno: czas rozpoczęcia, czas zakończenia
     clock_t start, stop, startP, stopP;
     
@@ -28,23 +28,23 @@ statystyki quickSortModyfikacja(int n, int * tablica, bool asc, statystyki Staty
         kopia_tablicy[i] = tablica[i];
     
     // mierzenie czasu dla kopii algorytmu (rozróżnienia na wersję asc i desc)
-    if (asc){
-        start = clock();
-        quickSortModyfikacjaCzasAsc(n, kopia_tablicy);
+    /*if (asc){
+        start = clock(); 
+        quickSortModyfikacjaCzasAsc(n, kopia_tablicy); 
         stop = clock();
     }
     else{
         start = clock();
         quickSortModyfikacjaCzasDesc(n, kopia_tablicy);
         stop = clock();
-    }
-    
+    }*/
+
     // właściwa część algorytmu
     startP = clock();
     Statystyki.operator=(quickSortModyfikacjaAlgorytm(n, tablica, asc, Statystyki, pokaz));
     stopP = clock();
     
-    Statystyki.czas = stop - start;
+    //Statystyki.czas = stop - start;
     Statystyki.czasPraktyczny = stopP - startP;
     
     if (podsumowanie)
@@ -97,6 +97,7 @@ statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statysty
             for (int i=0; i<size; i++){
                 mniejsze.push(tabMniejsze[i]);
             }
+            free(tabMniejsze);		
         }
     
         // sortowanie części z elementami większymi od pivota
@@ -111,6 +112,7 @@ statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statysty
             for (int i=0; i<size; i++){
                 wieksze.push(tabWieksze[i]);
             }
+            free(tabWieksze);
         }
     
         // łączenie tablic (przypadek asc i desc)
@@ -157,11 +159,49 @@ statystyki quickSortModyfikacjaAlgorytm(int n, int * tablica, bool asc, statysty
         }
     }
     
-    else{
-        Statystyki.operator=(insertSort(n, tablica, asc, Statystyki, false, pokaz));
-    }
+    else{ 
+
+	int * kopia_tablicy = new int[n];
+
+	for (int i = 0; i < n; i++)
+	        kopia_tablicy[i] = tablica[i];
+
+	if (asc){
+	        for (int i = 1; i < n; i++){
+	            bool maximum = true;
+	            for (int j = 0; j < i; j++){
+	                Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, tablica[i], kopia_tablicy[j], '<');
+	                if (tablica[i] < kopia_tablicy[j]){
+	                    Statystyki.przestawienia = wstawIPrzestaw(pokaz, tablica[i], j, n, kopia_tablicy, Statystyki.przestawienia);
+	                    maximum = false;
+	                    break;
+	                }
+	            }
+	            if (maximum)
+	                Statystyki.przestawienia = wstawIPrzestaw(pokaz, tablica[i], i, n, kopia_tablicy, Statystyki.przestawienia);
+	        }
+	    }
+	    else{
+	        for (int i = 1; i < n; i++){
+	            bool maximum = true;
+	            for (int j = 0; j < i; j++){
+	                Statystyki.porownania = porownanie(pokaz, Statystyki.porownania, tablica[i], kopia_tablicy[j], '>');
+	                if (tablica[i] > kopia_tablicy[j]){
+	                    Statystyki.przestawienia = wstawIPrzestaw(pokaz, tablica[i], j, n, kopia_tablicy, Statystyki.przestawienia);
+	                    maximum = false;
+	                    break;
+	                }
+	            }
+	            if (maximum)
+	                Statystyki.przestawienia = wstawIPrzestaw(pokaz, tablica[i], i, n, kopia_tablicy, Statystyki.przestawienia);
+	        }
+	    }
     
-    return Statystyki;
+	    for (int i = 0; i < n; i++)
+	       tablica[i] = kopia_tablicy[i];
+	    }
+    
+	    return Statystyki;
 }
 
 void quickSortModyfikacjaCzasAsc(int n, int * tablica){
@@ -198,6 +238,8 @@ void quickSortModyfikacjaCzasAsc(int n, int * tablica){
         
             for (int i=0; i<size; i++)
                 mniejsze.push(tabMniejsze[i]);
+		
+	free(tabMniejsze);
         }
     
         if (wieksze.size() > 1){
@@ -214,6 +256,8 @@ void quickSortModyfikacjaCzasAsc(int n, int * tablica){
         
             for (int i=0; i<size; i++)
                 wieksze.push(tabWieksze[i]);
+
+	free(tabWieksze);
         
         }
     
@@ -239,12 +283,32 @@ void quickSortModyfikacjaCzasAsc(int n, int * tablica){
         }
     }
     
-    else{
-        int kopia_tablicy_czas[n];
-        for (int i = 0; i < n; i++)
-            kopia_tablicy_czas[i] = tablica[i];
-        insertSortCzasAsc(n, tablica, kopia_tablicy_czas);
-    }
+    else{ 
+
+	int * kopia_tablicy = new int[n];
+
+	for (int i = 0; i < n; i++)
+	        kopia_tablicy[i] = tablica[i];
+	
+	        for (int i = 1; i < n; i++){
+	            bool maximum = true;
+	            for (int j = 0; j < i; j++){
+	                
+	                if (tablica[i] < kopia_tablicy[j]){
+	                    wstawIPrzesun(tablica[i], j, n, kopia_tablicy);
+	                    maximum = false;
+	                    break;
+	                }
+	            }
+	            if (maximum)
+	                wstawIPrzesun(tablica[i], i, n, kopia_tablicy);
+	        }
+	    
+    
+	    for (int i = 0; i < n; i++)
+	       tablica[i] = kopia_tablicy[i];
+	free(kopia_tablicy);	
+	    }	
 }
 
 void quickSortModyfikacjaCzasDesc(int n, int * tablica){
@@ -315,10 +379,28 @@ void quickSortModyfikacjaCzasDesc(int n, int * tablica){
             i++;
         }
     }
-    else{
-        int kopia_tablicy_czas[n];
-        for (int i = 0; i < n; i++)
-            kopia_tablicy_czas[i] = tablica[i];
-        insertSortCzasAsc(n, tablica, kopia_tablicy_czas);
-    }
+    else{ 
+
+	int * kopia_tablicy = new int[n];
+
+	for (int i = 0; i < n; i++)
+	        kopia_tablicy[i] = tablica[i];
+  
+	        for (int i = 1; i < n; i++){
+	            bool maximum = true;
+	            for (int j = 0; j < i; j++){
+	             
+	                if (tablica[i] > kopia_tablicy[j]){
+	                    wstawIPrzesun(tablica[i], j, n, kopia_tablicy);
+	                    maximum = false;
+	                    break;
+	                }
+	            }
+	            if (maximum)
+	                wstawIPrzesun(tablica[i], i, n, kopia_tablicy);
+	        }
+    
+	    for (int i = 0; i < n; i++)
+	       tablica[i] = kopia_tablicy[i];
+	    }
 }

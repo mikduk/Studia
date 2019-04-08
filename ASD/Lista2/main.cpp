@@ -14,7 +14,7 @@
 using namespace std;
 
 int main(int argc, const char * argv[]) {
-    
+  
     if (argc == 4){
         if (!strcmp(argv[1], "--type")){
             
@@ -140,18 +140,19 @@ int main(int argc, const char * argv[]) {
                 			kopia_tablicy[u] = tablica[u];
 				Quick.operator=(quickSort(i, kopia_tablicy, true, Quick, false, false));
 			
-				/*// QuickSortModyfikacja
+				
+				// QuickSortModyfikacja
 				for (int u = 0; u < i; u++)
                 			kopia_tablicy[u] = tablica[u];
 				ModifiedQuick.operator=(quickSortModyfikacja(i, kopia_tablicy, true, ModifiedQuick, false, false));
-				*/		
+						
 			}
 			fout << "i = " << i << endl;
 			fout << "InsertSort: porownania = " << Insert.porownania/k << " | przestawienia = " << Insert.przestawienia/k << " | czas teoretyczny = " << Insert.czas/k << " ms | czas praktyczny = " << Insert.czasPraktyczny/k << " ms" << endl;
 			fout << "SelectSort: porownania = " << Select.porownania/k << " | przestawienia = " << Select.przestawienia/k << " | czas teoretyczny = " << Select.czas/k << " ms | czas praktyczny = " << Select.czasPraktyczny/k << " ms" << endl;
 			fout << "HeapSort: porownania = " << Heap.porownania/k << " | przestawienia = " << Heap.przestawienia/k << " | czas teoretyczny = " << Heap.czas/k << " ms | czas praktyczny = " << Heap.czasPraktyczny/k << " ms" << endl;
 			fout << "QuickSort: porownania = " << Quick.porownania/k << " | przestawienia = " << Quick.przestawienia/k << " | czas teoretyczny = " << Quick.czas/k << " ms | czas praktyczny = " << Quick.czasPraktyczny/k << " ms" << endl;
-			/*fout << "QuickSortModyfikacja: porownania = " << ModifiedQuick.porownania/k << " | przestawienia = " << ModifiedQuick.przestawienia/k << " | czas teoretyczny = " << ModifiedQuick.czas/k << " ms | czas praktyczny = " << ModifiedQuick.czasPraktyczny/k << " ms" << endl;*/
+			fout << "QuickSortModyfikacja: porownania = " << ModifiedQuick.porownania/k << " | przestawienia = " << ModifiedQuick.przestawienia/k << " | czas teoretyczny = " << ModifiedQuick.czas/k << " ms | czas praktyczny = " << ModifiedQuick.czasPraktyczny/k << " ms" << endl;
 		}
 		fout.close();	
         }
@@ -162,4 +163,5 @@ int main(int argc, const char * argv[]) {
     else{
         cout << "argc != 4\n";
     }
+	return 0;
 }

@@ -19,26 +19,29 @@ statystyki insertSort(int n, int * tablica, bool asc, statystyki Statystyki, boo
     
     // kopiowanie tablicy
     int * kopia_tablicy = new int[n];
-    int * kopia_tablicy_czas = new int[n];
+
     for (int i = 0; i < n; i++){
         kopia_tablicy[i] = tablica[i];
-        kopia_tablicy_czas[i] = tablica[i];
     }
     
     // zmienne zliczające kolejno: porównania, przestawienia, czas rozpoczęcia, czas zakończenia
     int porownania = Statystyki.porownania, przestawienia = Statystyki.przestawienia;
     clock_t start, stop, startP, stopP;
     
-    // mierzenie czasu dla kopii algorytmu (rozróżnienia na wersję asc i desc)
-    if (asc){
+    // mierzenie czasu dla kopii algorytmu (rozróżnienia na wersję asc i desc) 
+    if (asc){ 
         start = clock();
-        insertSortCzasAsc(n, tablica, kopia_tablicy_czas);
+        insertSortCzasAsc(n, tablica, kopia_tablicy);
         stop = clock();
     }
     else{
         start = clock();
-        insertSortCzasDesc(n, tablica, kopia_tablicy_czas);
+        insertSortCzasDesc(n, tablica, kopia_tablicy);
         stop = clock();
+    }
+
+    for (int i = 0; i < n; i++){
+        kopia_tablicy[i] = tablica[i];
     }
     
     // właściwa część algorytmu SelectSort
