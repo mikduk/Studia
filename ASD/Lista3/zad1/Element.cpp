@@ -1,7 +1,7 @@
 #include "Element.h"
 #include <iostream>
 
-Element::Element(int p, int v){
+Element::Element(int v, int p){
   priority = p;
   value = v;
 }

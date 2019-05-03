@@ -7,7 +7,7 @@
 class PriorityQueue :protected Heap{
 
   public:
-    PriorityQueue():Heap(){}
+    PriorityQueue();
     void insert(int, int);
     void empty();
     void top();

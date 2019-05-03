@@ -1,14 +1,17 @@
-zad1: main.o Heap.o Element.o
-	g++ -o zad1 main.o Heap.o Element.o
+zad1: main.o PriorityQueue.o Heap.o Element.o
+	g++ -o zad1 main.o PriorityQueue.o Heap.o Element.o
 
-main.o: main.cpp Element.h
-	g++ -c main.cpp -Wall -ansi -pedantic 
+main.o: main.cpp PriorityQueue.h Heap.h Element.h
+	g++ -c main.cpp -Wall -pedantic
+
+PriorityQueue.o: PriorityQueue.cpp PriorityQueue.h Heap.h Element.h
+	g++ -c PriorityQueue.cpp -Wall -pedantic
 
 Heap.o: Heap.cpp Heap.h Element.h
-	g++ -c Heap.cpp -Wall -ansi -pedantic
+	g++ -c Heap.cpp -Wall -pedantic
 
 Element.o: Element.cpp Element.h
-	g++ -c Element.cpp -Wall -ansi -pedantic
+	g++ -c Element.cpp -Wall -pedantic
 
 clean:
 	rm -f *.o zad1

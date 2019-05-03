@@ -14,9 +14,9 @@ void PriorityQueue::insert(int x, int p){
 
 void PriorityQueue::empty(){
   if (numberOfElements == 0)
-    std::cout << "true (1)" << endl;
+    std::cout << "true (1)\n";
   else
-    std::cout << "false (0)" << endl;
+    std::cout << "false (0)\n";
 }
 
 void PriorityQueue::top(){
@@ -27,7 +27,7 @@ void PriorityQueue::top(){
 }
 
 void PriorityQueue::pop(){
-  if (empty())
+  if (numberOfElements == 0)
     std::cout<<"\n";
   else{
     show(0);
@@ -51,4 +51,3 @@ void PriorityQueue::priority(int x, int p){
 void PriorityQueue::print(){
   show();
 }
-};
