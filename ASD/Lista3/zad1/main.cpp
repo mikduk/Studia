@@ -1,3 +1,11 @@
+//
+//  main.cpp
+//  Lista 3 Zadanie 1 "Kolejka priorytetowa"
+//
+//  Created by Mikis Dukiel on 03/05/2019.
+//  Copyright © 2019 Mikis Dukiel. All rights reserved.
+//
+
 #include "PriorityQueue.h"
 #include "Heap.h"
 #include "Element.h"
@@ -36,8 +44,8 @@ int insertP(string p){
 }
 
 int priorityX(string x){
-  int stop=10;
-  for (int i = 10; i < (int) x.length(); i++){
+  int stop=9;
+  for (int i = 9; i < (int) x.length(); i++){
 
     if (isdigit(x[i]) == false && x[i] != '-'){
       stop = i;
@@ -45,8 +53,8 @@ int priorityX(string x){
     }
   }
 
-  x = x.substr(10, stop - 10);
-  x = x.substr(0, 9);
+  x = x.substr(9, stop - 9);
+  x = x.substr(0, 10);
 
   return stoi(x);
 }
@@ -99,7 +107,7 @@ int main(){
           myQueue.print();
           m--;
         }
-        else if (x.substr(0,9) == "priority"){
+        else if (x.substr(0,8) == "priority"){
           myQueue.priority(priorityX(x), priorityP(x));
           m--;
         }

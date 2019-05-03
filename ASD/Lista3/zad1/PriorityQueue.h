@@ -1,3 +1,11 @@
+//
+//  PriorityQueue.h
+//  Lista 3 "Kolejka priorytetowa"
+//
+//  Created by Mikis Dukiel on 03/05/2019.
+//  Copyright © 2019 Mikis Dukiel. All rights reserved.
+//
+
 #ifndef PRIORITYQUEUE_H
 #define PRIORITYQUEUE_H
 #include "Heap.h"

@@ -1,3 +1,11 @@
+//
+//  Heap.h
+//  Lista 3 Zadanie 1 "Kolejka priorytetowa"
+//
+//  Created by Mikis Dukiel on 03/05/2019.
+//  Copyright © 2019 Mikis Dukiel. All rights reserved.
+//
+
 #ifndef HEAP_H
 #define HEAP_H
 #include "Element.h"
@@ -15,18 +23,15 @@ class Heap{
     int size();
     void add(Element);
     void add(int, int);
-    void deleteFirst();
     void show(int);
     void show();
 
-  private:
-    int father(int);
+  protected:
+    int parent(int);
     int left(int);
     int right(int);
     void swap(int, int);
     void minHeapify(int);
-
-  protected:
     void buildMinHeap(int);
 };
 

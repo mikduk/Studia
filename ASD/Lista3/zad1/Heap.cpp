@@ -1,3 +1,11 @@
+//
+//  Heap.cpp
+//  Lista 3 Zadanie 1 "Kolejka priorytetowa"
+//
+//  Created by Mikis Dukiel on 03/05/2019.
+//  Copyright © 2019 Mikis Dukiel. All rights reserved.
+//
+
 #include "Heap.h"
 #include "Element.h"
 #include <iostream>
@@ -12,20 +20,17 @@ int Heap::size(){
 
 void Heap::add(Element a){
   tab[numberOfElements] = a;
+  int j = numberOfElements;
+  while (j > 0 && tab[parent(j)].getPriority() > tab[j].getPriority()){
+    swap(j, parent(j));
+    j = parent(j);
+  }
   numberOfElements++;
-  buildMinHeap(numberOfElements);
 }
 
 void Heap::add(int a, int b){
   Element temp(a,b);
   add(temp);
-}
-
-void Heap::deleteFirst(){
-  for (int i = 0; i < numberOfElements - 1; i++)
-    tab[i] = tab[i+1];
-  numberOfElements--;
-  buildMinHeap(numberOfElements);
 }
 
 void Heap::show(int i){
@@ -42,8 +47,11 @@ void Heap::show(){
   std::cout << std::endl;
 }
 
-int Heap::father(int i){
-  return i/2;
+int Heap::parent(int i){
+  if (i==0)
+    return 0;
+  else
+    return ((i+1)/2)-1;
 }
 
 int Heap::left(int i){
@@ -67,7 +75,7 @@ void Heap::minHeapify(int i){
   int min = i;
 
   if (l < numberOfElements){
-    if (tab[l].getPriority() < tab[i].getPriority())
+    if (tab[l].getPriority() < tab[min].getPriority())
         min = l;
   }
 
