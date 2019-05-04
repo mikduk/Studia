@@ -20,11 +20,11 @@ void PriorityQueue::insert(int x, int p){
     add(x, p);
 }
 
-void PriorityQueue::empty(){
+bool PriorityQueue::empty(){
   if (numberOfElements == 0)
-    std::cout << "true (1)\n";
+    return true;
   else
-    std::cout << "false (0)\n";
+    return false;
 }
 
 void PriorityQueue::top(){
@@ -34,11 +34,14 @@ void PriorityQueue::top(){
     show(0);
 }
 
-void PriorityQueue::pop(){
-  if (numberOfElements == 0)
-    std::cout<<"\n";
+int PriorityQueue::pop(){
+  int temp = -1;
+  if (numberOfElements == 0){
+    //std::cout<<"\n"; - zad1
+  }
   else{
-    show(0);
+    //show(0); - zad1
+    temp = tab[0].getValue();
     if (tab[1].getPriority() != tab[--numberOfElements].getPriority()){
       tab[0] = tab[numberOfElements];
       minHeapify(0);
@@ -48,6 +51,7 @@ void PriorityQueue::pop(){
         tab[i] = tab[i+1];
     }
   }
+  return temp;
 }
 
 void PriorityQueue::priority(int x, int p){
