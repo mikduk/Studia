@@ -35,7 +35,33 @@ void ExtendedGraph::kruskal(){
       unionSet(u, v);
     }
   }
-  printResult(A);
+  printResultKruskal(A);
+}
+
+void ExtendedGraph::prim(){
+    directedGraph();
+    double * key = new double [n];
+    int * previous = new int [n];
+    correctAdjacencyMatrix();
+    initializeSingleSource(source, key, previous);
+    PriorityQueue Q;
+    createQueue(Q, key);
+
+    while (!Q.empty()){
+      int u = Q.pop();
+      for (int v = 0; v < n; v++){
+        if (adjacencyMatrix[u][v] != inf)
+          if (elementOfSet(v, Q) && adjacencyMatrix[u][v] < key[v]){
+            previous[v] = u;
+            key[v] = adjacencyMatrix[u][v];
+          }
+      }
+    }
+
+    printResultPrim(key, previous);
+
+    delete [] previous;
+    delete [] key;
 }
 
 void ExtendedGraph::directedGraph(){
@@ -95,13 +121,30 @@ void ExtendedGraph::unionSet(int u, int v){
     }
 }
 
-void ExtendedGraph::printResult(PriorityQueue &A){
+void ExtendedGraph::printResultKruskal(PriorityQueue &A){
   int id, w, sum = 0;
   while(!A.empty()){
     w = A.topPriority();
     id = A.pop();
     cout << id / n + 1 << " " << id % n + 1 << " " << w << endl;
     sum += w;
+  }
+  cout << "sum of each edges: " << sum << endl;
+}
+
+bool ExtendedGraph::elementOfSet(int v, PriorityQueue Q){
+  while (!Q.empty()){
+    if (v == Q.pop())
+      return true;
+  }
+  return false;
+}
+
+void ExtendedGraph::printResultPrim(double key[], int previous[]){
+  double sum = 0;
+  for (int i = 1; i < n; i++){
+    sum += key[i];
+    cout << previous[i] + 1 << " " << i + 1 << " " << key[i] << endl;
   }
   cout << "sum of each edges: " << sum << endl;
 }

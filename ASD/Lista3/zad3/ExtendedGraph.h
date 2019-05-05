@@ -26,7 +26,9 @@ class ExtendedGraph :public Graph{
     void sortEdges(PriorityQueue &edges);
     int findSet(int x);
     void unionSet(int u, int v);
-    void printResult(PriorityQueue &A);
+    void printResultKruskal(PriorityQueue &A);
+    bool elementOfSet(int v, PriorityQueue Q);
+    void printResultPrim(double key[], int previous[]);
 
 };
 
