@@ -26,15 +26,16 @@ class NewGraph :public Graph{
   public:
     NewGraph(int nn, int mm);
     void addEdge(int u, int v);
+    void addEdgeT(int v, int u);
     void stronglyConnectedComponents();
 
   protected:
     void dfsInit();
     void dfs();
     void dfsT();
-    void dfsVisit(int u, int time);
-    void dfsVisitT(int u, int time);
-    void printStronglyConnectedComponents();
+    void dfsVisit(int u, int &time);
+    void dfsVisitT(int u, int &time);
+    void printStronglyConnectedComponents(PriorityQueue topologicalSort);
 
 };
 

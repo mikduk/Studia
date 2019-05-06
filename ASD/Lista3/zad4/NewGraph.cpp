@@ -1,10 +1,16 @@
 #include "NewGraph.h"
+#include "Element.h"
+#include <queue>
 
 using namespace std;
 
 NewGraph::NewGraph(int nn, int mm):Graph(nn, mm){}
 
 void NewGraph::addEdge(int u, int v){
+  Graph::addEdge(u, v, 1);
+}
+
+void NewGraph::addEdgeT(int v, int u){
   Graph::addEdge(u, v, 1);
 }
 
@@ -23,7 +29,7 @@ void NewGraph::dfs(){
   }
 }
 
-void NewGraph::dfsVisit(int u, int time){
+void NewGraph::dfsVisit(int u, int &time){
   time++;
   d[u] = time;
   color[u] = grey;
@@ -39,10 +45,6 @@ void NewGraph::dfsVisit(int u, int time){
 }
 
 void NewGraph::dfsT(){
-  for (int u = 0; u < n; u++){
-    color[u] = white;
-    previous[u] = -1;
-  }
   int time = 0;
 
   PriorityQueue F;
@@ -51,12 +53,18 @@ void NewGraph::dfsT(){
 
   while(!F.empty()){
     int u = F.pop();
+    if(color[u] == white){
+      dfsVisitT(u, time);}
+  }
+  /* // to test
+  for (int u = 0; u < n; u++){
     if(color[u] == white)
       dfsVisitT(u, time);
   }
+  */
 }
 
-void NewGraph::dfsVisitT(int u, int time){
+void NewGraph::dfsVisitT(int u, int &time){
   time++;
   d[u] = time;
   color[u] = grey;
@@ -64,16 +72,70 @@ void NewGraph::dfsVisitT(int u, int time){
     if (adjacencyMatrix[v][u] >= 0)
       if (color[v] == white){
         previous[v] = u;
-        dfsVisit(v, time);
+        dfsVisitT(v, time);
       }
   color[u] = black;
   time++;
   f[u] = time;
 }
 
-void NewGraph::printStronglyConnectedComponents(){
+void NewGraph::printStronglyConnectedComponents(PriorityQueue topologicalSort){
+  cout << endl;
+  bool * visited = new bool[n];
+
   for (int i = 0; i < n; i++)
-    cout << "i: " << (char) (i+97) << ", i.d = " << d[i] << ", i.f = " << f[i] << endl;
+    visited[i] = false;
+
+  queue <Element> result;
+  while (!topologicalSort.empty()){
+    int i = topologicalSort.pop();
+    Element e(previous[i]+1, i+1);
+    result.push(e);
+  }
+  Element guard(-1, -1);
+  result.push(guard);
+  int find = result.front().getValue();
+
+  while (result.size() > 1){
+    Element e = result.front();
+    if (e.getValue() == find){
+      if (find != 0){
+        cout << e.getValue() << " ";
+        find = e.getPriority();
+      }
+      else{
+        cout << e.getPriority() << " ";
+      }
+      result.pop();
+      visited[e.getValue()] = true;
+    }
+    else if (visited[e.getPriority()]){
+      result.pop();
+    }
+    else if (e.getValue() == e.getPriority() && e.getValue() == -1){
+      result.push(e);
+      result.pop();
+      cout << find << endl;
+      find = result.front().getValue();
+    }
+    else if (e.getValue() == 0){
+      int del = e.getPriority();
+      result.push(e);
+      result.pop();
+      while (!(result.front().getValue() == 0 && result.front().getPriority() == del)){
+        if (result.front().getValue() != del)
+          result.push(result.front());
+        result.pop();
+      }
+      result.push(result.front());
+      result.pop();
+    }
+    else{
+      result.push(e);
+      result.pop();
+    }
+  }
+  cout << endl;
 }
 
 void NewGraph::stronglyConnectedComponents(){
@@ -81,10 +143,18 @@ void NewGraph::stronglyConnectedComponents(){
   previous = new int[n];
   d = new int[n];
   f = new int[n];
+
   dfsInit();
   dfs();
-  //dfsT();
-  printStronglyConnectedComponents();
+
+  PriorityQueue topologicalSort;
+  for (int u = 0; u < n; u++)
+    topologicalSort.insert(u, 2*m - f[u]);
+
+  dfsInit();
+  dfsT();
+  printStronglyConnectedComponents(topologicalSort);
+
   delete [] f;
   delete [] d;
   delete [] previous;
