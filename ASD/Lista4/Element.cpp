@@ -9,9 +9,9 @@
 #include "Element.h"
 
 Element::Element(std::string this_key, Element * this_left, Element * this_right, Element * this_parent, colour this_color){
-  this_key = key;
-  this_left = left;
-  this_right = right;
-  this_parent = parent;
-  this_color = color;
+  key = this_key;
+  left = this_left;
+  right = this_right;
+  parent = this_parent;
+  color = this_color;
 }

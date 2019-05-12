@@ -10,6 +10,8 @@
 #define ELEMENT_H
 #include <string>
 
+class Element;
+
 enum colour{
   black = 0,
   red = 1

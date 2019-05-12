@@ -9,12 +9,11 @@
 #ifndef TREES_H
 #define TREES_H
 #include <string>
-#include <vector>
 #include "Element.h"
 
 class Trees{
 protected:
-  std::vector < Element > tree;
+  Element * root;
   unsigned int numberOfElements;
 public:
   virtual void insert(std::string s)=0;
@@ -32,6 +31,10 @@ public:
   virtual bool search(std::string s);
   virtual void load(std::string f);
   virtual void inorder();
+protected:
+  Element * minimum(Element * x);
+  Element * maximum(Element * x);
+  void inorderTreeWalk(Element * x);
 };
 
 class RBT :public Trees{

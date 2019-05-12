@@ -5,7 +5,8 @@ int main(){
   Trees * tree;
   std::cout << "Hello World!\n";
   BST bst;
-  bst.insert("a");
+  bst.insert("ba");
   bst.insert("b");
+  //bst.insert("c");
   return 0;
 }

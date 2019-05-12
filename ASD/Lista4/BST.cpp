@@ -11,31 +11,57 @@
 
 BST::BST(){
   Trees::numberOfElements = 0;
-  Element nil("*nil*", NULL, NULL, NULL);
-  tree.push_back(nil);
 }
 
 void BST::insert(std::string s){ std::cout<<"[insert] s: "<<s<<"\n";
   if (numberOfElements == 0){
-    Element * nil = &tree[0]; std::cout << "nil: " << nil << "\n";
-    Element root(s, nil, nil, nil);
-    tree.push_back(root);
+    Element r(s, NULL, NULL, NULL);
+    root = &r;
   }
   else{
-    Element * y = &tree[0]; // NIL
-    Element * x = &tree[1]; // root
+    Element * y = NULL; // NIL
+    Element * x = root; // root
     std::cout<<"y = " << y << ", x = "<< x <<"\n";
     std::cout<<"key: "<< x -> key << ", left: " << x->left << "\n";
-    /*while (&x != &tree[0]){
+    while (x != NULL){
       y = x;
       if (s < (x -> key))
           x = (x -> left);
       else
           x = (x -> right);
-    }*/
-    Element * parent = y;
+    }
+    Element * p = y;
+    Element node(s, NULL, NULL, p);
+    if (y -> key < p -> key)
+      (p -> left) = &node;
+    else
+      (p -> right) = &node;
   }
   numberOfElements++;
+  //inorderTreeWalk(root);
+  std::cout << "root: " << root << " " << root -> key << "\n";
+}
+
+void BST::inorderTreeWalk(Element * x){
+  if (x != NULL){
+    inorderTreeWalk(x -> left);
+    std::cout << x -> key << " \n";
+    inorderTreeWalk(x -> right);
+  }
+}
+
+Element * BST::minimum(Element * x){
+  while (x -> left != NULL){
+    x = x -> left;
+  }
+  return x;
+}
+
+Element * BST::maximum(Element * x){
+  while (x -> right != NULL){
+    x = x -> right;
+  }
+  return x;
 }
 
 void BST::del(std::string s){}
