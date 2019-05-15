@@ -21,6 +21,8 @@ public:
   virtual bool search(std::string s)=0;
   virtual void load(std::string f)=0;
   virtual void inorder()=0;
+protected:
+  std::string validation(std::string s);
 };
 
 class BST :public Trees{

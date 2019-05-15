@@ -13,39 +13,66 @@ BST::BST(){
   Trees::numberOfElements = 0;
 }
 
+std::string Trees::validation(std::string s){
+  while (!( ((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))) && ((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))){
+    if (!((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))))
+      s = s.substr(1, s.length()-1);
+    if (!((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))
+      s = s.substr(0, s.length()-1);
+  }
+  return s;
+}
+
 void BST::insert(std::string s){ std::cout<<"[insert] s: "<<s<<"\n";
+  s = validation(s); std::cout<<"[insert] s: "<<s<<"\n";
   if (numberOfElements == 0){
-    Element r(s, NULL, NULL, NULL);
-    root = &r;
+    root = (Element*)malloc(sizeof *root);
+    root -> key = s;
+    root -> left = NULL;
+    root -> right = NULL;
+    root -> parent = NULL;
   }
   else{
     Element * y = NULL; // NIL
     Element * x = root; // root
-    std::cout<<"y = " << y << ", x = "<< x <<"\n";
-    std::cout<<"key: "<< x -> key << ", left: " << x->left << "\n";
+
     while (x != NULL){
+
       y = x;
       if (s < (x -> key))
           x = (x -> left);
+
       else
           x = (x -> right);
+
     }
+
     Element * p = y;
-    Element node(s, NULL, NULL, p);
-    if (y -> key < p -> key)
-      (p -> left) = &node;
+
+    Element * node;
+    node = (Element*)malloc(sizeof *node);
+    node -> key = s;
+    node -> left = NULL;
+    node -> right = NULL;
+    node -> parent = p;
+
+    if (node -> key < p -> key)
+      (p -> left) = node;
     else
-      (p -> right) = &node;
+      (p -> right) = node;
   }
   numberOfElements++;
-  //inorderTreeWalk(root);
-  std::cout << "root: " << root << " " << root -> key << "\n";
+  std::cout<<"[inorder]\n";
+  inorder();
+  std::cout<<"[/inorder]\n";
+  std::cout << "root: " << root << " " << root -> key << " " << root -> left << " " << root -> right << "\n";
 }
 
 void BST::inorderTreeWalk(Element * x){
   if (x != NULL){
     inorderTreeWalk(x -> left);
-    std::cout << x -> key << " \n";
+    //std::cout << x << " " << x -> key << " " << x -> left << " " << x -> right << " " << x -> parent << "\n";
+    std::cout << x -> key << " ";
     inorderTreeWalk(x -> right);
   }
 }
@@ -67,4 +94,7 @@ Element * BST::maximum(Element * x){
 void BST::del(std::string s){}
 bool BST::search(std::string s){return true;}
 void BST::load(std::string f){}
-void BST::inorder(){}
+void BST::inorder(){
+  inorderTreeWalk(root);
+  std::cout<<"\n";
+}
