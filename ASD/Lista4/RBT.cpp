@@ -1,8 +1,8 @@
 //
-//  BST.cpp
+//  RBT.cpp
 //  Lista 4
 //
-//  Created by Mikis Dukiel on 11/05/2019.
+//  Created by Mikis Dukiel on 16/05/2019.
 //  Copyright © 2019 Mikis Dukiel. All rights reserved.
 //
 
@@ -10,21 +10,11 @@
 #include <iostream>
 #include <fstream>
 
-BST::BST(){
+RBT::RBT(){
   Trees::numberOfElements = 0;
 }
 
-std::string Trees::validation(std::string s){
-  while (!( ((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))) && ((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))){
-    if (!((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))))
-      s = s.substr(1, s.length()-1);
-    if (!((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))
-      s = s.substr(0, s.length()-1);
-  }
-  return s;
-}
-
-void BST::insert(std::string s){
+void RBT::insert(std::string s){
   s = validation(s);
   if (numberOfElements == 0){
     root = (Element*)malloc(sizeof *root);
@@ -62,7 +52,7 @@ void BST::insert(std::string s){
   numberOfElements++;
 }
 
-void BST::inorderTreeWalk(Element * x){
+void RBT::inorderTreeWalk(Element * x){
   if (x != NULL){
     inorderTreeWalk(x -> left);
     std::cout << x -> key << " ";
@@ -70,21 +60,21 @@ void BST::inorderTreeWalk(Element * x){
   }
 }
 
-Element * BST::minimum(Element * x){
+Element * RBT::minimum(Element * x){
   while (x -> left != NULL){
     x = x -> left;
   }
   return x;
 }
 
-Element * BST::maximum(Element * x){
+Element * RBT::maximum(Element * x){
   while (x -> right != NULL){
     x = x -> right;
   }
   return x;
 }
 
-bool BST::find(std::string s){
+bool RBT::find(std::string s){
   if (numberOfElements == 0)
     return false;
   else if (root -> key == s)
@@ -103,7 +93,7 @@ bool BST::find(std::string s){
   return false;
 }
 
-Element * BST::getElement(std::string s){
+Element * RBT::getElement(std::string s){
   if (numberOfElements == 0)
     return NULL;
   else if (root -> key == s)
@@ -122,7 +112,7 @@ Element * BST::getElement(std::string s){
   return NULL;
 }
 
-void BST::transplant(Element * u, Element * v){
+void RBT::transplant(Element * u, Element * v){
   if (u -> parent == NULL)
     root = v;
   else if (u == (u -> parent) -> left)
@@ -134,7 +124,7 @@ void BST::transplant(Element * u, Element * v){
     v -> parent = u -> parent;
 }
 
-void BST::del(std::string s){
+void RBT::del(std::string s){
   Element * z;
   if (find(s)){
     z = getElement(s);
@@ -157,15 +147,15 @@ void BST::del(std::string s){
 
 }
 
-void BST::search(std::string s){
+void RBT::search(std::string s){
   std::cout << find(s) << "\n";
 }
 
-void BST::load(std::string f){
-  
+void RBT::load(std::string f){
+
 }
 
-void BST::inorder(){
+void RBT::inorder(){
   inorderTreeWalk(root);
   std::cout<<"\n";
 }
