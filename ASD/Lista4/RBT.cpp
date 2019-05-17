@@ -14,6 +14,42 @@ RBT::RBT(){
   Trees::numberOfElements = 0;
 }
 
+void RBT::leftRotate(Element * x){
+  Element * y = x -> right;
+  x -> right = y -> left;
+
+  if (y -> left != NULL)
+    (y -> left) -> parent = x;
+  y -> parent = x -> parent;
+
+  if (x -> parent == NULL)
+    root = y;
+  else if (x == (x -> parent) -> left)
+    (x -> parent) -> left = y;
+  else
+    (x -> parent) -> right = y;
+  y -> left = x;
+  x -> parent = y;
+}
+
+void RBT::rightRotate(Element * x){
+  Element * y = x -> left;
+  x -> left = y -> right;
+
+  if (y -> right != NULL)
+    (y -> right) -> parent = x;
+  y -> parent = x -> parent;
+
+  if (x -> parent == NULL)
+    root = y;
+  else if (x == (x -> parent) -> left)
+    (x -> parent) -> left = y;
+  else
+    (x -> parent) -> right = y;
+  y -> right = x;
+  x -> parent = y;
+}
+
 void RBT::insert(std::string s){
   s = validation(s);
   if (numberOfElements == 0){
@@ -22,6 +58,7 @@ void RBT::insert(std::string s){
     root -> left = NULL;
     root -> right = NULL;
     root -> parent = NULL;
+    root -> color = black;
   }
   else{
     Element * y = NULL; // NIL
@@ -43,13 +80,63 @@ void RBT::insert(std::string s){
     node -> left = NULL;
     node -> right = NULL;
     node -> parent = p;
+    node -> color = red;
 
     if (node -> key < p -> key)
       (p -> left) = node;
     else
       (p -> right) = node;
+    insertFixup(node);
   }
   numberOfElements++;
+}
+
+void RBT::insertFixup(Element * node){
+  while(node -> parent != NULL && (node -> parent) -> color == red){
+    if (node -> parent == ((node -> parent) -> parent) -> left){
+      Element * y = ((node -> parent) -> parent) -> right;
+      // case 1
+      if (y != NULL && y -> color == red){
+        (node -> parent) -> color = black;
+        y -> color = black;
+        ((node -> parent) -> parent) -> color = red;
+        node = (node -> parent) -> parent;
+      }
+      else{
+          // case 2
+        if (node == (node -> parent) -> right){
+          node = node -> parent;
+          leftRotate(node);
+        }
+        // case 3
+        (node -> parent) -> color = black;
+        ((node -> parent) -> parent) -> color = red;
+        rightRotate((node -> parent) -> parent);
+      }
+    }
+    else{
+      Element * y = ((node -> parent) -> parent) -> left;
+      // case 4
+      if (y != NULL && y -> color == red){
+        (node -> parent) -> color = black;
+        y -> color = black;
+        ((node -> parent) -> parent) -> color = red;
+        node = (node -> parent) -> parent;
+      }
+      else{
+          // case 5
+        if (node == (node -> parent) -> left){
+          node = node -> parent;
+          rightRotate(node);
+        }
+        // case 6
+        (node -> parent) -> color = black;
+        ((node -> parent) -> parent) -> color = red;
+        leftRotate((node -> parent) -> parent);
+      }
+    }
+  }
+  root -> color = black;
 }
 
 void RBT::inorderTreeWalk(Element * x){

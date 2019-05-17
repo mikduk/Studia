@@ -48,14 +48,21 @@ protected:
 class RBT :public Trees{
 public:
   RBT();
-  virtual void insert(std::string s)=0;
-  virtual void del(std::string s)=0;
-  virtual void search(std::string s)=0;
-  virtual void load(std::string f)=0;
-  virtual void inorder()=0;
-  virtual bool find(std::string s);
+  virtual void insert(std::string s);
+  virtual void del(std::string s);
+  virtual void search(std::string s);
+  virtual void load(std::string f);
+  virtual void inorder();
 protected:
+  Element * minimum(Element * x);
+  Element * maximum(Element * x);
+  void leftRotate(Element * x);
+  void rightRotate(Element * x);
+  void insertFixup(Element * node);
+  void inorderTreeWalk(Element * x);
+  virtual bool find(std::string s);
   virtual Element * getElement(std::string s);
+  void transplant(Element * u, Element * v);
 };
 
 class Splay :public Trees{

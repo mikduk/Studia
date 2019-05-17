@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 int main(int argc, const char * argv[]){
-
+/*
   if (argc != 3 || strcmp(argv[1], "--type")){
     std::cout << "You must write \"./list4 --type [bst/rbt/splay]\"\n";
     return 1;
@@ -13,12 +13,13 @@ int main(int argc, const char * argv[]){
   Trees * tree;
   std::cout << "Hello World!\n";
   BST bst;
+  RBT rbt;
 
   if (!strcmp(argv[2], "bst")){
     tree = &bst;
   }
   else if (!strcmp(argv[2], "rbt")){
-
+    tree = &rbt;
   }
   else if (!strcmp(argv[2], "splay")){
 
@@ -32,7 +33,7 @@ int main(int argc, const char * argv[]){
   std::cout << "n = "; std::cin >> numberOfOperations;
 
   while (numberOfOperations > 0){
-    printf("n: %4.d | i - insert | d - delete | s - search | l - load | p - print(inorder) |\n", numberOfOperations);
+    printf("\t\tn: %4.d | i - insert | d - delete | s - search | l - load | p - print(inorder) |\n", numberOfOperations);
     char command; std::cout << "command: "; std::cin >> command;
     std::string s;
     switch (command) {
@@ -57,7 +58,7 @@ int main(int argc, const char * argv[]){
         break;
     }
     numberOfOperations--;
-  }
-
+  }*/
+  /*test*/ RBT rbt; rbt.insert("aaa"); rbt.insert("bb"); rbt.insert("cc"); rbt.inorder();
   return 0;
 }
