@@ -14,18 +14,8 @@ BST::BST(){
   Trees::numberOfElements = 0;
 }
 
-std::string Trees::validation(std::string s){
-  while (!( ((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))) && ((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))){
-    if (!((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))))
-      s = s.substr(1, s.length()-1);
-    if (!((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))
-      s = s.substr(0, s.length()-1);
-  }
-  return s;
-}
-
 void BST::insert(std::string s){
-  s = validation(s);
+  //s = validation(s);
   if (numberOfElements == 0){
     root = (Element*)malloc(sizeof *root);
     root -> key = s;
@@ -34,8 +24,10 @@ void BST::insert(std::string s){
     root -> parent = NULL;
   }
   else{
-    Element * y = NULL; // NIL
-    Element * x = root; // root
+    Element * y = (Element*)malloc(sizeof *y);
+    y = NULL;
+    Element * x = (Element*)malloc(sizeof *x);
+    x = root;
 
     while (x != NULL){
       y = x;
@@ -45,10 +37,10 @@ void BST::insert(std::string s){
           x = (x -> right);
     }
 
-    Element * p = y;
+    Element * p = (Element*)malloc(sizeof *p);
+    p = y;
 
-    Element * node;
-    node = (Element*)malloc(sizeof *node);
+    Element * node = (Element*)malloc(sizeof *node);
     node -> key = s;
     node -> left = NULL;
     node -> right = NULL;
@@ -154,7 +146,7 @@ void BST::del(std::string s){
         (y -> left) -> parent = y;
     }
   }
-
+  numberOfElements--;
 }
 
 void BST::search(std::string s){
@@ -162,7 +154,7 @@ void BST::search(std::string s){
 }
 
 void BST::load(std::string f){
-  
+
 }
 
 void BST::inorder(){

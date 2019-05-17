@@ -22,7 +22,6 @@ public:
   virtual void load(std::string f)=0;
   virtual void inorder()=0;
 protected:
-  std::string validation(std::string s);
   virtual bool find(std::string s)=0;
   virtual Element * getElement(std::string s)=0;
 
@@ -59,6 +58,7 @@ protected:
   void leftRotate(Element * x);
   void rightRotate(Element * x);
   void insertFixup(Element * node);
+  void deleteFixup(Element * node);
   void inorderTreeWalk(Element * x);
   virtual bool find(std::string s);
   virtual Element * getElement(std::string s);
