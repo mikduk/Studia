@@ -12,6 +12,7 @@
 
 RBT::RBT(){
   Trees::numberOfElements = 0;
+  root = NULL;
 }
 
 void RBT::leftRotate(Element * x){
@@ -253,10 +254,10 @@ void RBT::del(std::string s){
       (y -> left) -> parent = y;
       y -> color = z -> color;
     }
-  }
   if (yOriginalColor == black)
     deleteFixup(x);
   numberOfElements--;
+  }
 }
 
 void RBT::deleteFixup(Element * x){
@@ -335,6 +336,7 @@ void RBT::load(std::string f){
 }
 
 void RBT::inorder(){
-  inorderTreeWalk(root);
+  if (root != NULL)
+    inorderTreeWalk(root);
   std::cout<<"\n";
 }

@@ -14,7 +14,7 @@ std::string validation(std::string s){
 }
 
 int main(int argc, const char * argv[]){
-/*
+
   if (argc != 3 || strcmp(argv[1], "--type")){
     std::cout << "You must write \"./list4 --type [bst/rbt/splay]\"\n";
     return 1;
@@ -24,6 +24,7 @@ int main(int argc, const char * argv[]){
   std::cout << "Hello World!\n";
   BST bst;
   RBT rbt;
+  Splay splay;
 
   if (!strcmp(argv[2], "bst")){
     tree = &bst;
@@ -32,7 +33,7 @@ int main(int argc, const char * argv[]){
     tree = &rbt;
   }
   else if (!strcmp(argv[2], "splay")){
-
+    tree = &splay;
   }
   else{
     std::cout << "Third parametr mustn't be unequal to \"bst\",\"rbt\" or \"splay\"\n";
@@ -68,8 +69,10 @@ int main(int argc, const char * argv[]){
         break;
     }
     numberOfOperations--;
-  }*/
+  }
+
   /*test*/
+  /*
   std::string a;
   //RBT rbt;
 
@@ -95,5 +98,6 @@ int main(int argc, const char * argv[]){
 }
   //if (j == end - 1) rbt.inorder();
 //}
+*/
   return 0;
 }

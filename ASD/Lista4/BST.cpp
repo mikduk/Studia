@@ -12,6 +12,7 @@
 
 BST::BST(){
   Trees::numberOfElements = 0;
+  root = NULL;
 }
 
 void BST::insert(std::string s){
@@ -46,7 +47,9 @@ void BST::insert(std::string s){
     node -> right = NULL;
     node -> parent = p;
 
-    if (node -> key < p -> key)
+    if (y == NULL)
+      root = node;
+    else if (node -> key < p -> key)
       (p -> left) = node;
     else
       (p -> right) = node;
@@ -127,7 +130,7 @@ void BST::transplant(Element * u, Element * v){
 }
 
 void BST::del(std::string s){
-  Element * z;
+  Element * z= (Element*)malloc(sizeof *z);
   if (find(s)){
     z = getElement(s);
     if (z -> left == NULL)
@@ -145,8 +148,8 @@ void BST::del(std::string s){
         y -> left = z -> left;
         (y -> left) -> parent = y;
     }
-  }
   numberOfElements--;
+  }
 }
 
 void BST::search(std::string s){
@@ -158,6 +161,7 @@ void BST::load(std::string f){
 }
 
 void BST::inorder(){
-  inorderTreeWalk(root);
+  if (root != NULL)
+    inorderTreeWalk(root);
   std::cout<<"\n";
 }
