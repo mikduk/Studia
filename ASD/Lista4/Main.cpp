@@ -3,16 +3,6 @@
 #include <string.h>
 #include <stdio.h>
 
-std::string validation(std::string s){
-  while (!( ((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))) && ((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))){
-    if (!((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))))
-      s = s.substr(1, s.length()-1);
-    if (!((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))
-      s = s.substr(0, s.length()-1);
-  }
-  return s;
-}
-
 int main(int argc, const char * argv[]){
 
   if (argc != 3 || strcmp(argv[1], "--type")){
@@ -50,7 +40,7 @@ int main(int argc, const char * argv[]){
     switch (command) {
       case 'i':
         std::cout << "s: "; std::cin >> s;
-        tree -> insert(validation(s));
+        tree -> insert(tree -> validation(s));
         break;
       case 'd':
         std::cout << "s: "; std::cin >> s;
@@ -62,7 +52,7 @@ int main(int argc, const char * argv[]){
         break;
       case 'l':
         std::cout << "f: "; std::cin >> s;
-        //tree -> load(s);
+        tree -> load(s);
         break;
       case 'p':
         tree -> inorder();

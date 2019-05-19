@@ -19,8 +19,9 @@ public:
   virtual void insert(std::string s)=0;
   virtual void del(std::string s)=0;
   virtual void search(std::string s)=0;
-  virtual void load(std::string f)=0;
+  void load(std::string f);
   virtual void inorder()=0;
+  std::string validation(std::string s);
 protected:
   virtual bool find(std::string s)=0;
   virtual Element * getElement(std::string s)=0;
@@ -33,7 +34,6 @@ public:
   virtual void insert(std::string s);
   virtual void del(std::string s);
   virtual void search(std::string s);
-  virtual void load(std::string f);
   virtual void inorder();
 protected:
   Element * minimum(Element * x);
@@ -50,7 +50,6 @@ public:
   virtual void insert(std::string s);
   virtual void del(std::string s);
   virtual void search(std::string s);
-  virtual void load(std::string f);
   virtual void inorder();
 protected:
   Element * minimum(Element * x);
@@ -71,7 +70,6 @@ public:
   virtual void insert(std::string s);
   virtual void del(std::string s);
   virtual void search(std::string s);
-  virtual void load(std::string f);
   virtual void inorder();
 protected:
   void splay(Element * x);

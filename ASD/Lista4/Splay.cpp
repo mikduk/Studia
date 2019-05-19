@@ -244,7 +244,3 @@ void Splay::inorder(){
     inorderTreeWalk(root);
   std::cout<<"\n";
 }
-
-void Splay::load(std::string f){
-
-}

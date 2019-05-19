@@ -331,10 +331,6 @@ void RBT::search(std::string s){
   std::cout << find(s) << "\n";
 }
 
-void RBT::load(std::string f){
-
-}
-
 void RBT::inorder(){
   if (root != NULL)
     inorderTreeWalk(root);

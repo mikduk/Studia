@@ -15,6 +15,16 @@ BST::BST(){
   root = NULL;
 }
 
+std::string Trees::validation(std::string s){
+  while (!( ((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))) && ((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))){
+    if (!((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))))
+      s = s.substr(1, s.length()-1);
+    if (!((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))
+      s = s.substr(0, s.length()-1);
+  }
+  return s;
+}
+
 void BST::insert(std::string s){
   //s = validation(s);
   if (numberOfElements == 0){
@@ -156,8 +166,19 @@ void BST::search(std::string s){
   std::cout << find(s) << "\n";
 }
 
-void BST::load(std::string f){
-
+void Trees::load(std::string f){
+   std::ifstream fin;
+   fin.open(f);
+   if (!fin.is_open()){
+      std::cout << "There is no such file as " << f << "\n";
+      fin.close();
+      return;
+   }
+   std::string word;
+   while (fin >> word){
+      this->insert(validation(word));
+   }
+   fin.close();
 }
 
 void BST::inorder(){
