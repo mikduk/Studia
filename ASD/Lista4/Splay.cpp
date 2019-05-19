@@ -13,6 +13,12 @@
 
 Splay::Splay(){
   Trees::numberOfElements = 0;
+  Trees::maxNumberOfElements = 0;
+  Trees::numberOfInsert = 0;
+  Trees::numberOfDel = 0;
+  Trees::numberOfSearch = 0;
+  Trees::numberOfLoad = 0;
+  Trees::numberOfInOrder = 0;
   root = NULL;
 }
 
@@ -57,6 +63,8 @@ void Splay::insert(std::string s){ std::cout << "[insert] " << s << "\n";
       (p -> right) = node;
   }
   numberOfElements++;
+  if (numberOfElements > maxNumberOfElements)
+    maxNumberOfElements = numberOfElements;
 }
 
 void Splay::splay(Element * x){

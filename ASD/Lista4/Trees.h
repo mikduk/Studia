@@ -15,6 +15,14 @@ class Trees{
 protected:
   Element * root;
   unsigned int numberOfElements;
+  unsigned int maxNumberOfElements;
+  unsigned int numberOfInsert;
+  unsigned int numberOfDel;
+  unsigned int numberOfSearch;
+  unsigned int numberOfLoad;
+  unsigned int numberOfInOrder;
+  unsigned int numberOfComparison;
+  unsigned int numberOfChangesOfElements;
 public:
   virtual void insert(std::string s)=0;
   virtual void del(std::string s)=0;
@@ -22,6 +30,7 @@ public:
   void load(std::string f);
   virtual void inorder()=0;
   std::string validation(std::string s);
+  void statistic();
 protected:
   virtual bool find(std::string s)=0;
   virtual Element * getElement(std::string s)=0;

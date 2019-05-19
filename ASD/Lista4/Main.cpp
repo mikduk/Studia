@@ -61,5 +61,7 @@ int main(int argc, const char * argv[]){
     numberOfOperations--;
   }
 
+  tree -> statistic();
+
   return 0;
 }

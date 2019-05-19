@@ -12,6 +12,12 @@
 
 RBT::RBT(){
   Trees::numberOfElements = 0;
+  Trees::maxNumberOfElements = 0;
+  Trees::numberOfInsert = 0;
+  Trees::numberOfDel = 0;
+  Trees::numberOfSearch = 0;
+  Trees::numberOfLoad = 0;
+  Trees::numberOfInOrder = 0;
   root = NULL;
 }
 
@@ -96,6 +102,8 @@ void RBT::insert(std::string s){
     insertFixup(node);
   }
   numberOfElements++;
+  if (numberOfElements > maxNumberOfElements)
+    maxNumberOfElements = numberOfElements;
 }
 
 void RBT::insertFixup(Element * node){
