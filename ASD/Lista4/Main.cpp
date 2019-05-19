@@ -1,7 +1,9 @@
 #include "Trees.h"
+#include "Tests.h"
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
+#include <ctime>
 
 int main(int argc, const char * argv[]){
 
@@ -11,10 +13,10 @@ int main(int argc, const char * argv[]){
   }
 
   Trees * tree;
-  std::cout << "Hello World!\n";
   BST bst;
   RBT rbt;
   Splay splay;
+  AllOfThem allOfThem;
 
   if (!strcmp(argv[2], "bst")){
     tree = &bst;
@@ -25,14 +27,18 @@ int main(int argc, const char * argv[]){
   else if (!strcmp(argv[2], "splay")){
     tree = &splay;
   }
+  else if (!strcmp(argv[2], "all")){
+    tree = &allOfThem;
+  }
   else{
     std::cout << "Third parametr mustn't be unequal to \"bst\",\"rbt\" or \"splay\"\n";
     return 2;
   }
 
   int numberOfOperations;
+  clock_t start, stop;
   std::cout << "n = "; std::cin >> numberOfOperations;
-
+  start = clock();
   while (numberOfOperations > 0){
     printf("\t\tn: %4.d | i - insert | d - delete | s - search | l - load | p - print(inorder) |\n", numberOfOperations);
     char command; std::cout << "command: "; std::cin >> command;
@@ -57,11 +63,20 @@ int main(int argc, const char * argv[]){
       case 'p':
         tree -> inorder();
         break;
+      case 't':
+        test(tree);
+        return 0;
     }
     numberOfOperations--;
   }
+  stop = clock();
+  std::cerr << "\n duration of the entire program:\t" << stop - start << " ms\n";
 
-  tree -> statistic();
+  if (!strcmp(argv[2], "all")){
+    allOfThem.statistic();
+  }
+  else
+    tree -> statistic();
 
   return 0;
 }

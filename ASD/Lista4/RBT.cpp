@@ -8,7 +8,6 @@
 
 #include "Trees.h"
 #include <iostream>
-#include <fstream>
 
 RBT::RBT(){
   Trees::numberOfElements = 0;
@@ -18,17 +17,25 @@ RBT::RBT(){
   Trees::numberOfSearch = 0;
   Trees::numberOfLoad = 0;
   Trees::numberOfInOrder = 0;
+  Trees::numberOfComparison = 0;
+  Trees::numberOfChangesOfElements = 0;
   root = NULL;
 }
 
 void RBT::leftRotate(Element * x){
-  Element * y = x -> right;
+  Element * y = (Element*)malloc(sizeof *y);
+  y = x -> right;
   x -> right = y -> left;
+  numberOfChangesOfElements++;
 
-  if (y -> left != NULL)
+  numberOfComparison++;
+  if (y -> left != NULL){
     (y -> left) -> parent = x;
+    numberOfChangesOfElements++;
+  }
   y -> parent = x -> parent;
 
+  numberOfComparison++;
   if (x -> parent == NULL)
     root = y;
   else if (x == (x -> parent) -> left)
@@ -37,16 +44,23 @@ void RBT::leftRotate(Element * x){
     (x -> parent) -> right = y;
   y -> left = x;
   x -> parent = y;
+  numberOfChangesOfElements++;
 }
 
 void RBT::rightRotate(Element * x){
-  Element * y = x -> left;
+  Element * y = (Element*)malloc(sizeof *y);
+  y = x -> left;
   x -> left = y -> right;
+  numberOfChangesOfElements++;
 
-  if (y -> right != NULL)
+  numberOfComparison++;
+  if (y -> right != NULL){
     (y -> right) -> parent = x;
+    numberOfChangesOfElements++;
+  }
   y -> parent = x -> parent;
 
+  numberOfComparison++;
   if (x -> parent == NULL)
     root = y;
   else if (x == (x -> parent) -> left)
@@ -55,10 +69,15 @@ void RBT::rightRotate(Element * x){
     (x -> parent) -> right = y;
   y -> right = x;
   x -> parent = y;
+  numberOfChangesOfElements++;
 }
 
 void RBT::insert(std::string s){
-  //s = validation(s);
+  if (s.length() == 0){
+    std::cout << "[s is incorrect]\n";
+    return;
+  }
+  numberOfInsert++;
   if (numberOfElements == 0){
     root = (Element*)malloc(sizeof *root);
     root -> key = s;
@@ -75,6 +94,7 @@ void RBT::insert(std::string s){
 
     while (x != NULL){
       y = x;
+      numberOfComparison++;
       if (s < (x -> key))
           x = (x -> left);
       else
@@ -89,6 +109,7 @@ void RBT::insert(std::string s){
     node -> key = s;
     node -> parent = p;
 
+    numberOfComparison++;
     if (y == NULL)
       root = node;
     else if (node -> key < p -> key)
@@ -109,6 +130,7 @@ void RBT::insert(std::string s){
 void RBT::insertFixup(Element * node){
   Element * y = (Element*)malloc(sizeof *y);
   while(node -> parent != NULL && (node -> parent) -> color == red){
+    numberOfComparison++;
     if ((node -> parent) -> parent != NULL && node -> parent == ((node -> parent) -> parent) -> left){
       y = ((node -> parent) -> parent) -> right;
       // case 1
@@ -119,6 +141,7 @@ void RBT::insertFixup(Element * node){
         node = (node -> parent) -> parent;
       }
       else{
+        numberOfComparison++;
           // case 2
         if (node == (node -> parent) -> right){
           node = node -> parent;
@@ -141,6 +164,7 @@ void RBT::insertFixup(Element * node){
         node = (node -> parent) -> parent;
       }
       else{
+        numberOfComparison++;
           // case 5
         if (node == (node -> parent) -> left){
           node = node -> parent;
@@ -148,6 +172,7 @@ void RBT::insertFixup(Element * node){
         }
         // case 6
         (node -> parent) -> color = black;
+        numberOfComparison++;
         if ((node -> parent) -> parent != NULL){
           ((node -> parent) -> parent) -> color = red;
           leftRotate((node -> parent) -> parent);
@@ -159,6 +184,7 @@ void RBT::insertFixup(Element * node){
 }
 
 void RBT::inorderTreeWalk(Element * x){
+  numberOfComparison++;
   if (x != NULL){
     inorderTreeWalk(x -> left);
     std::cout << x -> key << " ";
@@ -169,25 +195,32 @@ void RBT::inorderTreeWalk(Element * x){
 Element * RBT::minimum(Element * x){
   while (x -> left != NULL){
     x = x -> left;
+    numberOfComparison++;
   }
+  numberOfComparison++;
   return x;
 }
 
 Element * RBT::maximum(Element * x){
   while (x -> right != NULL){
     x = x -> right;
+    numberOfComparison++;
   }
+  numberOfComparison++;
   return x;
 }
 
 bool RBT::find(std::string s){
   if (numberOfElements == 0)
     return false;
-  else if (root -> key == s)
+  else if (root -> key == s){
+    numberOfComparison++;
     return true;
+  }
   else{
     Element * x = root;
     while (x != NULL){
+      numberOfComparison++;
       if (x -> key == s)
         return true;
       else if (x -> key > s)
@@ -195,6 +228,7 @@ bool RBT::find(std::string s){
       else
         x = (x -> right);
     }
+    numberOfComparison++;
   }
   return false;
 }
@@ -202,11 +236,14 @@ bool RBT::find(std::string s){
 Element * RBT::getElement(std::string s){
   if (numberOfElements == 0)
     return NULL;
-  else if (root -> key == s)
+  else if (root -> key == s){
+    numberOfComparison++;
     return root;
+  }
   else{
     Element * x = root;
     while (x != NULL){
+      numberOfComparison++;
       if (x -> key == s)
         return x;
       else if (x -> key > s)
@@ -214,11 +251,14 @@ Element * RBT::getElement(std::string s){
       else
         x = (x -> right);
     }
+    numberOfComparison++;
   }
   return NULL;
 }
 
 void RBT::transplant(Element * u, Element * v){
+  numberOfComparison++;
+  numberOfChangesOfElements++;
   if (u -> parent == NULL)
     root = v;
   else if (u == (u -> parent) -> left)
@@ -226,17 +266,22 @@ void RBT::transplant(Element * u, Element * v){
   else
     (u -> parent) -> right = v;
 
-  if (v != NULL)
+  numberOfComparison++;
+  if (v != NULL){
     v -> parent = u -> parent;
+    numberOfChangesOfElements++;
+  }
 }
 
 void RBT::del(std::string s){
+  numberOfDel++;
   Element *x, *y, *z;
   colour yOriginalColor;
   if (find(s)){
     z = getElement(s);
     y = z;
     yOriginalColor = y -> color;
+    numberOfComparison++;
     if (z -> left == NULL){
       x = z -> right;
       transplant(z, z -> right);
@@ -249,6 +294,7 @@ void RBT::del(std::string s){
       y = minimum(z -> right);
       yOriginalColor = y -> color;
       x = y -> right;
+      numberOfComparison++;
       if (y -> parent == z){
         if (x != NULL)
         x -> parent = y;}
@@ -271,6 +317,7 @@ void RBT::del(std::string s){
 void RBT::deleteFixup(Element * x){
   Element * w;
   while (x != NULL && x -> color == black && x != root){
+    numberOfComparison++;
     if (x == (x -> parent) -> left){
       w = (x -> parent) -> right;
       // case 1
@@ -336,10 +383,12 @@ void RBT::deleteFixup(Element * x){
 }
 
 void RBT::search(std::string s){
+  numberOfSearch++;
   std::cout << find(s) << "\n";
 }
 
 void RBT::inorder(){
+  numberOfInOrder++;
   if (root != NULL)
     inorderTreeWalk(root);
   std::cout<<"\n";

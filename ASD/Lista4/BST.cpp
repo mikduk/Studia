@@ -24,16 +24,24 @@ BST::BST(){
 }
 
 std::string Trees::validation(std::string s){
-  while (!( ((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))) && ((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))){
+  while (s.length() > 0 && !( ((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))) && ((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))){
     if (!((((char) s[0] > 64) && ((char) s[0] < 91)) || (((char) s[0] > 96) && ((char) s[0] < 123))))
       s = s.substr(1, s.length()-1);
     if (!((((char) s[s.length()-1] > 64) && ((char) s[s.length()-1] < 91)) || (((char) s[s.length()-1] > 96) && ((char) s[s.length()-1] < 123))))
       s = s.substr(0, s.length()-1);
   }
-  return s;
+
+  if (s.length() > 0)
+    return s;
+  else
+    return "";
 }
 
 void BST::insert(std::string s){
+  if (s.length() == 0){
+    std::cout << "[s is incorrect]\n";
+    return;
+  }
   numberOfInsert++;
   if (numberOfElements == 0){
     root = (Element*)malloc(sizeof *root);
@@ -213,7 +221,10 @@ void Trees::load(std::string f){
    }
    std::string word;
    while (fin >> word){
-      this->insert(validation(word));
+     word = validation(word);
+     if (word.length() > 0){
+      this->insert(word);
+    }
    }
    fin.close();
 }
@@ -226,7 +237,6 @@ void BST::inorder(){
 }
 
 void Trees::statistic(){
-  std::cerr << "\n";
   std::cerr << " number of function Insert() calls: \t" << numberOfInsert << "\n";
   std::cerr << " number of function Delete() calls: \t" << numberOfDel << "\n";
   std::cerr << " number of function Search() calls: \t" << numberOfSearch << "\n";

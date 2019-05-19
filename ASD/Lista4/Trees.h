@@ -12,7 +12,7 @@
 #include "Element.h"
 
 class Trees{
-protected:
+public:
   Element * root;
   unsigned int numberOfElements;
   unsigned int maxNumberOfElements;
@@ -27,7 +27,7 @@ public:
   virtual void insert(std::string s)=0;
   virtual void del(std::string s)=0;
   virtual void search(std::string s)=0;
-  void load(std::string f);
+          void load(std::string f);
   virtual void inorder()=0;
   std::string validation(std::string s);
   void statistic();
@@ -81,10 +81,27 @@ public:
   virtual void search(std::string s);
   virtual void inorder();
 protected:
-  void splay(Element * x);
-  void leftRotate(Element * x);
-  void rightRotate(Element * x);
-  void inorderTreeWalk(Element * x);
+          void splay(Element * x);
+          void leftRotate(Element * x);
+          void rightRotate(Element * x);
+          void inorderTreeWalk(Element * x);
+  virtual bool find(std::string s);
+  virtual Element * getElement(std::string s);
+};
+
+class AllOfThem :public Trees{
+public:
+  BST bst_tree; BST * bst;
+  RBT rbt_tree; RBT * rbt;
+  Splay splay_tree; Splay * splay;
+  AllOfThem();
+  virtual void insert(std::string s);
+  virtual void del(std::string s);
+  virtual void search(std::string s);
+          void load(std::string f);
+  virtual void inorder();
+          void statistic();
+protected:
   virtual bool find(std::string s);
   virtual Element * getElement(std::string s);
 };

@@ -1,8 +1,14 @@
-list4: Main.o Splay.o RBT.o BST.o Element.o
-	g++ -o list4 Main.o Splay.o RBT.o BST.o Element.o
+list4: Main.o Test.o AllOfThem.o Splay.o RBT.o BST.o Element.o
+	g++ -o list4 Main.o Test.o AllOfThem.o Splay.o RBT.o BST.o Element.o
 
-Main.o: Main.cpp Trees.h
+Main.o: Main.cpp Trees.h Tests.h
 	g++ -c Main.cpp -Wall -pedantic
+
+Test.o: Test.cpp Trees.h Tests.h
+	g++ -c Test.cpp -Wall -pedantic
+
+AllOfThem.o: AllOfThem.cpp Trees.h
+				g++ -c AllOfThem.cpp -Wall -pedantic
 
 Splay.o: Splay.cpp Trees.h
 			g++ -c Splay.cpp -Wall -pedantic
