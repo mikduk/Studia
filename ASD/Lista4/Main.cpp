@@ -71,33 +71,5 @@ int main(int argc, const char * argv[]){
     numberOfOperations--;
   }
 
-  /*test*/
-  /*
-  std::string a;
-  //RBT rbt;
-
-  int end = 11229; int j = 1;
-  while (j < end){
-  //for (int j = 0; j < end; j++){ BST rbt;//RBT rbt;
-  BST rbt;
-  for (int i = 0; i < j; i++){
-    char ch = 'a' + i;
-    a = ch;
-    rbt.insert(a);
-    //rbt.inorder();
-  }
-  //rbt.inorder();
-  for (int i = 0; i < j; i++){
-    char ch = 'a' + i;
-    a = ch;
-    rbt.del(a);
-    //rbt.inorder();
-    rbt.insert(a);
-  }
-  j++;
-}
-  //if (j == end - 1) rbt.inorder();
-//}
-*/
   return 0;
 }

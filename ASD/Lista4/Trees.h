@@ -75,8 +75,8 @@ public:
   virtual void inorder();
 protected:
   void splay(Element * x);
-  void makeLeftChildParent(Element * x, Element * p);
-  void makeRightChildParent(Element * x, Element * p);
+  void leftRotate(Element * x);
+  void rightRotate(Element * x);
   void inorderTreeWalk(Element * x);
   virtual bool find(std::string s);
   virtual Element * getElement(std::string s);

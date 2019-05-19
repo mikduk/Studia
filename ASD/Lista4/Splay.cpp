@@ -9,13 +9,14 @@
 #include "Trees.h"
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 Splay::Splay(){
   Trees::numberOfElements = 0;
   root = NULL;
 }
 
-void Splay::insert(std::string s){
+void Splay::insert(std::string s){ std::cout << "[insert] " << s << "\n";
   //s = validation(s);
   if (numberOfElements == 0){
     root = (Element*)malloc(sizeof *root);
@@ -25,6 +26,7 @@ void Splay::insert(std::string s){
     root -> parent = NULL;
   }
   else{
+    find(s);
     Element * y = (Element*)malloc(sizeof *y);
     y = NULL;
     Element * x = (Element*)malloc(sizeof *x);
@@ -53,7 +55,6 @@ void Splay::insert(std::string s){
       (p -> left) = node;
     else
       (p -> right) = node;
-    splay(node);
   }
   numberOfElements++;
 }
@@ -66,30 +67,30 @@ void Splay::splay(Element * x){
     g = (x -> parent) -> parent;
 
     if (g == NULL){
-      if (x == p -> left)
-        makeLeftChildParent(x, p);
+      if (p -> left != NULL && x == p -> left)
+        rightRotate(p);
       else
-        makeRightChildParent(x, p);
+        leftRotate(p);
     }
     else{
       if (x == p -> left){
         if (p == g -> left){
-          makeLeftChildParent(p, g);
-          makeLeftChildParent(x, p);
+          rightRotate(g);
+          rightRotate(p);
         }
         else{
-          makeLeftChildParent(x, p);
-          makeRightChildParent(x, p);
+          rightRotate(p);
+          leftRotate(g);
         }
       }
       else{
         if (p == g -> left){
-          makeRightChildParent(x, p);
-          makeLeftChildParent(x, p);
+          leftRotate(p);
+          rightRotate(g);
         }
         else{
-          makeRightChildParent(p, g);
-          makeRightChildParent(x, p);
+          leftRotate(g);
+          leftRotate(p);
         }
       }
     }
@@ -97,44 +98,45 @@ void Splay::splay(Element * x){
   root = x;
 }
 
-void Splay::makeLeftChildParent(Element * x, Element * p){
-  if ((x == NULL) || (p == NULL) || (p -> left != x) || (x -> parent != p))
-    std::cout << "[makeLeftChildParent] WRONG\n";
+void Splay::leftRotate(Element * x){
+  Element * y = (Element*)malloc(sizeof *y);
+  y = x -> right;
+  x -> right = y -> left;
 
-  if (p -> parent != NULL){
-    if (p == (p -> parent) -> left)
-        (p -> parent) -> left = x;
-    else
-        (p -> parent) -> right = x;
-  }
+  if (y -> left != NULL)
+    (y -> left) -> parent = x;
+  y -> parent = x -> parent;
 
-  if (x -> right != NULL)
-    (x -> right) -> parent = p;
-
-  x -> parent = p -> parent;
-  p -> parent = x;
-  p -> left = x -> right;
-  x -> right = p;
+  if (x -> parent == NULL)
+    root = y;
+  else if (x == (x -> parent) -> left)
+    (x -> parent) -> left = y;
+  else
+    (x -> parent) -> right = y;
+  y -> left = x;
+  x -> parent = y;
 }
 
-void Splay::makeRightChildParent(Element * x, Element * p){
-  if ((x == NULL) || (p == NULL) || (p -> right != x) || (x -> parent != p))
-    std::cout << "[makeRightChildParent] WRONG\n";
+void Splay::rightRotate(Element * x){
+  Element * y = (Element*)malloc(sizeof *y);
+  y = x -> left;
+  if (y != NULL)
+    x -> left = y -> right;
+  else
+    x -> left = NULL;
 
-  if (p -> parent != NULL){
-    if (p == (p -> parent) -> left)
-        (p -> parent) -> left = x;
-    else
-        (p -> parent) -> right = x;
-  }
+  if (y -> right != NULL)
+    (y -> right) -> parent = x;
+  y -> parent = x -> parent;
 
-  if (x -> left != NULL)
-    (x -> left) -> parent = p;
-
-  x -> parent = p -> parent;
-  p -> parent = x;
-  p -> right = x -> left;
-  x -> left = p;
+  if (x -> parent == NULL)
+    root = y;
+  else if (x == (x -> parent) -> left)
+    (x -> parent) -> left = y;
+  else
+    (x -> parent) -> right = y;
+  y -> right = x;
+  x -> parent = y;
 }
 
 void Splay::del(std::string s){
