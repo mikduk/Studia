@@ -15,8 +15,8 @@ AllOfThem::AllOfThem(){
   Splay tree3; splay_tree = tree3; splay = &splay_tree;
 }
 
-void AllOfThem::insert(std::string s){ std::cout << "bst numberOfInsert: " << bst -> numberOfInsert << std::endl;
-    bst -> insert(s); std::cout << "bst numberOfInsert: " << bst -> numberOfInsert << std::endl;
+void AllOfThem::insert(std::string s){ 
+    bst -> insert(s);
     rbt -> insert(s);
   splay -> insert(s);
 }
