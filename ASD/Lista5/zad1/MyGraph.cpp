@@ -128,8 +128,5 @@
 			}
 		}
 		fin << ";" << std::endl;
-		//bw.write(";");
-		//bw.newLine();
-		//bw.close();
     fin.close();
 }

@@ -15,7 +15,7 @@ if (argc == 6 && !strcmp(argv[5], "--test")){
   int i = atoi(argv[4]);
   int sum = 0;
   clock_t start, times = 0;
-  int x = 10000;
+  int x = 100;
   for (int j = 0; j < x; j++){
   MyGraphTest *G = new MyGraphTest(k, i, j);
   start = clock();
@@ -29,6 +29,8 @@ if (argc == 6 && !strcmp(argv[5], "--test")){
   std::cout << "avg time: " << times / x << " ms" << std::endl;
   return 0;
 }
+  else if (argc == 6 && !strcmp(argv[5], "--glpk")){}
+
   else if (argc != 5  || strcmp(argv[1], "--size") || strcmp(argv[3], "--degree")){
     std::cout << "You must write \"./zad2 --size k --degree i" << std::endl;
     return 1;
@@ -53,5 +55,7 @@ if (argc == 6 && !strcmp(argv[5], "--test")){
   G.program();
   stop = clock();
   std::cerr << std::endl << "Duration of the entire program: "  << stop - start << " ms" << std::endl;
+  if (argc == 6 && !strcmp(argv[5], "--glpk"))
+    G.glpk();
   return 0;
 }

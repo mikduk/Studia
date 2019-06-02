@@ -4,6 +4,7 @@
 #include <ctime>
 #include <algorithm>
 #include <queue>
+#include <fstream>
 
 MyGraph::MyGraph(int k, int i){
   my_k = k;
@@ -191,4 +192,19 @@ void MyGraph::createV2(int k_2, int i){
     }
     std::cout << std::endl;
   }
+}
+
+void MyGraph::glpk(){
+  std::fstream fin;
+  int k_2 = my_pow(my_k);
+  fin.open("zad4.txt", std::ios::out);
+	fin << "param n := " << 2*k_2 - 1 << ";" << std::endl;
+	fin << "param : E : w :=" << std::endl;
+	for(int i = 0; i < k_2; i++) {
+		for(int j = 0; j < my_i; j++) {
+		   fin << i << " " << v1[i][j] << " " << 1 << std::endl;
+		}
+	}
+	fin << ";" << std::endl;
+	fin.close();
 }

@@ -20,6 +20,7 @@ public:
   MyGraph(int k, int i);
   ~MyGraph();
   void program();
+  void glpk();
 protected:
   int my_pow(int i);
   int * my_rand(int max, int i);
