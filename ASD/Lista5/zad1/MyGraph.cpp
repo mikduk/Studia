@@ -2,6 +2,7 @@
     #include <iostream>
     #include <queue>
     #include <algorithm>
+    #include <fstream>
 
     int HammingCode::errorCorrection(int x){
 		    std::string binary = "";
@@ -114,22 +115,21 @@
     }
 
     void MyGraph::showGraph(int numOfVerticles){
-
-		std::cout << "param n := " << numOfVerticles << ";" << std::endl;
-		//bw.write("param n := " + numOfVerticles + ";");
-		//bw.newLine();
-		std::cout << "param : E :   a :=" << std::endl;
-		//bw.write("param : E :   a :=");
-		//bw.newLine();
+    std::fstream fin;
+    fin.open("zad3.txt", std::ios::out);
+		std::cout << std::endl;
+		fin << "param n := " << numOfVerticles << ";" << std::endl;
+		std::cout << "  E:\tC:" << std::endl;
+		fin << "param : E :   a :=" << std::endl;
 		for(int i = 0; i < numOfVerticles; i++) {
 			for(int j = 0; j < numOfVerticles; j++) {
-				 std::cout << (i+1) << " " << (j+1) << "\t" << capacity[i][j] << std::endl;
-				//bw.write((i+1) +" " + (j+1) + "    " + capacity[i][j]);
-				//bw.newLine();
+				 std::cout << (i+1) << " - " << (j+1) << "\t" << capacity[i][j] << std::endl;
+			   fin << (i+1) << " " << (j+1) << "\t" << capacity[i][j] << std::endl;
 			}
 		}
-		std::cout << ";" << std::endl;
+		fin << ";" << std::endl;
 		//bw.write(";");
 		//bw.newLine();
 		//bw.close();
+    fin.close();
 }

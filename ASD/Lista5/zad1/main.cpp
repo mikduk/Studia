@@ -26,8 +26,8 @@ int main(int argc, const char * argv[]){
          int source = 0;
          int target = numOfVertices - 1; // 2^k-1
 
-         std::cout << "Number of vertices: " << numOfVertices << std::endl;
-         std::cout << "Number of edges: " << numOfEdges << std::endl;
+         std::cout << "|V| = " << numOfVertices << std::endl;
+         std::cout << "|E| = " << numOfEdges << std::endl;
 
 
        // create k-dimensional hypercube
