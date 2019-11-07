@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"/>
+<script src="script.js"></script>
+<script src="zad1b.js"></script>
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0"/>
+</head>
+
+<body>
+  <canvas id="myCanvas"></canvas>
+  <div id="dane">
+    <div id="pozycja_x">x: <b>50%</b></div>
+    <div id="pozycja_y">y: <b>50%</b></div>
+    <div id="pozycja_arc">kąt: <b>0</b></div>
+  </div>
+  <div id="konsola">
+    <div id="historia"></div>
+    <br><input type="text" id="polecenie" size="48" height="40"><br>
+    <button type="button" onclick="polecenie_wykonac()">Wykonaj polecenie</button>
+  </div>
+</body>

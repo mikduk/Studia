@@ -1,0 +1,16 @@
+#myCanvas{
+  border:1px solid navy;
+  width: 50vmin;
+  height: 50vmin;
+}
+
+#dane
+{
+  font-size: 3vh;
+}
+
+button
+{
+    padding: 1vmax;
+    margin: 1vmax;
+}
